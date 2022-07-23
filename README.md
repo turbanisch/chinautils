@@ -25,6 +25,7 @@ The names of Chinese provinces may vary between institutions and data
 sources: Inner Mongolia might come as “Inner Mongol”, “Inner Mongolia
 Autonomous Region”, “内蒙古”, “内蒙古自治区”, “Nei Menggu” or “Nei
 Menggu Zizhiqu”, making it hard to merge province-level data.
+
 `provincename` uses regular expressions to convert province names in
 English, German or Chinese to ISO codes and other output formats, such
 as those used by China Customs. It does not, however, take care of

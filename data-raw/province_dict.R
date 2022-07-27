@@ -83,6 +83,11 @@ iso <- iso %>%
 iso <- iso %>%
   mutate(regex = str_c(".*", regex, "|", short_name_zh, ".*"))
 
+# add "mainland" indicator
+# https://en.wikipedia.org/wiki/Mainland_China
+iso <- iso %>%
+  mutate(mainland = !(gb_2260 %in% c("HK", "MO", "TW")))
+
 
 # get English names -------------------------------------------------------
 
@@ -149,7 +154,9 @@ province_dict <- province_dict %>%
     full_name_en,
     full_name_zh,
     full_name_py,
-    regex
+    regex,
+    type,
+    mainland
   )
 
 # Identify regular expression origin codes (for countrycode)

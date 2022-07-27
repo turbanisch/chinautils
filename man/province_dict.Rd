@@ -5,7 +5,7 @@
 \alias{province_dict}
 \title{Concordance table of province names and codes.}
 \format{
-A data frame with 34 rows and 11 variables:
+A data frame with 34 rows and 12 variables:
 \describe{
 \item{iso_3166_2}{province code according to ISO 3166-2:CN}
 \item{gb_2260}{province code according to Guobiao GB/T 2260}
@@ -16,6 +16,7 @@ A data frame with 34 rows and 11 variables:
 \item{_py}{province name in Pinyin (the official romanization system for Chinese in Mainland China)}
 \item{regex}{regular expressions matching province names in English, German and Chinese}
 \item{type}{administrative type, e.g., municipality}
+\item{mainland}{Does the province belong to Mainland China? \code{FALSE} for Hong Kong, Macao and Taiwan, \code{TRUE} otherwise}
 \item{china_customs}{numeric code used by the General Administration of Customs of China}
 }
 }

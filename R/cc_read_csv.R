@@ -9,22 +9,17 @@
 #'
 #' @examples
 cc_read_csv <- function(file, drop_descriptions = TRUE) {
-
-  col_types <- if (drop_descriptions) "cc_c_c_c_dcdcn_" else "cccccccccdcdcn_"
-
   # read data
   dat <- readr::read_csv(
       file = file,
       na = "?",
       locale = readr::locale(encoding = "GB18030"),
-      col_types = col_types
+      col_types = "cccccccccdcdcn_", # trailing comma is interpreted as extra column, do not read in
+      col_names = chinautils::cc_variable_names$clean_name,
+      skip = 1L # skip colnames present in the data
     )
 
-  # harmonize variable names
-  concordance <- chinautils::cc_variable_names %>%
-    mutate(pattern = stringr::str_c("^", zh, "$", "|", "^", en, "$"))
-  dict <- concordance$clean_name %>% rlang::set_names(concordance$pattern)
-  dat <- dat %>% rename_with(~stringr::str_replace_all(.x, dict))
+  if (drop_descriptions) dat <- dat %>% select(!ends_with("_name"))
 
   # convert yearmonth to date
   dat <- dat %>% mutate(yearmonth = lubridate::ym(yearmonth))

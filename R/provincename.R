@@ -37,7 +37,7 @@ provincename <- function(sourcevar,
     sourcevar,
     origin = origin,
     destination = destination,
-    custom_dict = province_dict,
+    custom_dict = chinautils::province_dict,
     ...
   )
 }

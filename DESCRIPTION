@@ -13,7 +13,10 @@ Depends:
     R (>= 2.10)
 LazyData: true
 Imports: 
-    countrycode
+    countrycode,
+    dplyr,
+    lubridate,
+    readr
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

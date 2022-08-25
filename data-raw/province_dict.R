@@ -126,7 +126,7 @@ english <- english %>%
 
 # load Chinese province names
 province_codes_zh <- read_csv(
-  "data-raw/china_customs_provinces.csv",
+  "data-raw/china-customs-codes/provinces/china_customs_provinces.csv",
   locale = locale(encoding = "GB18030"),
   col_select = c("收发货人注册地编码", "收发货人注册地名称"),
   col_types = cols(.default = col_character())

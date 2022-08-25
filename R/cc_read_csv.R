@@ -12,7 +12,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import readr
-cc_read_csv <- function(paths, drop_descriptions = TRUE) {
+cc_read_csv <- function(paths,  drop_descriptions = TRUE) {
   # glimpse at first row to determine which columns are present and which language is used
   first_row <- read_csv(paths[1],
                         n_max = 0L,
@@ -59,15 +59,15 @@ cc_read_csv <- function(paths, drop_descriptions = TRUE) {
     # convert province code to ISO
     dat <-
       dat %>% mutate(
-        province_code = chinautils::provincename(province_code, origin = "china_customs")
+        province = chinautils::provincename(province, origin = "china_customs")
       )
 
     # sort
     dat %>% arrange(
       yearmonth,
-      partner_code,
-      province_code,
-      regime_code,
-      commodity_code
+      partner,
+      province,
+      regime,
+      commodity
     )
 }

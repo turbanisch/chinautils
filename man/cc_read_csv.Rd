@@ -4,12 +4,12 @@
 \alias{cc_read_csv}
 \title{Read and Clean Trade Data From China Customs}
 \usage{
-cc_read_csv(file, drop_descriptions = TRUE)
+cc_read_csv(paths, drop_descriptions = TRUE)
 }
 \arguments{
-\item{file}{Path to one or multiple CSV files downloaded from China Customs. Files can be in English, Chinese, or a mix of both.}
-
 \item{drop_descriptions}{Keep only codes for commodity, partner country, province, and customs regime? Default is \code{TRUE} because descriptions are redundant and often include spelling mistakes.}
+
+\item{file}{Path to one or multiple CSV files downloaded from China Customs. Files can be in English, Chinese, or a mix of both.}
 }
 \value{
 A tibble
@@ -18,5 +18,5 @@ A tibble
 This is a function to read CSV files downloaded from China Customs with the correct encoding and column type specification. It expects data that was queried by month across the four dimensions commodity, partner country, province, and customs regime. The function harmonizes column names between English and Chinese files, converts dates and adds an ISO3 identifier for Chinese provinces.
 }
 \details{
-Note that this function does not perform any sanity checks on the data, so make sure no individual CSV file was cut off after 10,000 lines.
+Note that this function does not perform any sanity checks on the data, so make sure no individual CSV file was cut off after 10,000 lines. The function expects (and ignores) a trailing comma in each line of the CSV file which is normally added by China Customs.
 }

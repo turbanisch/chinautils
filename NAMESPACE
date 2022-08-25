@@ -3,3 +3,5 @@
 export(cc_read_csv)
 export(provincename)
 import(dplyr)
+import(readr)
+import(tidyr)

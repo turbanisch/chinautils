@@ -20,18 +20,12 @@ cc_read_csv <- function(paths,  drop_descriptions = TRUE) {
                         col_types = cols(.default = col_character()))
 
     valid_colnames <- colnames(first_row %>% select(!starts_with("...")))
-    chinese <- any(str_detect(valid_colnames, "\\p{script=Han}"))
+    language <- if (any(str_detect(valid_colnames, "\\p{script=Han}"))) "zh" else "en"
 
-    # get list of colnames to replace
-    if (chinese) {
-      clean_colnames <- chinautils::cc_variable_names %>%
-        filter(zh %in% valid_colnames) %>%
-        pull(clean_name)
-    } else {
-      clean_colnames <- chinautils::cc_variable_names %>%
-        filter(en %in% valid_colnames) %>%
-        pull(clean_name)
-    }
+    # get list of colnames to replace (preserving their order)
+    tibble(valid_colnames) %>%
+      left_join(chinautils::cc_variable_names, by = c("valid_colnames" = language)) %>%
+      pull(clean_name)
 
     # read all files
     dat <- read_csv(

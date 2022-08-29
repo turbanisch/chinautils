@@ -51,12 +51,6 @@ cc_read_csv <- function(paths,  drop_descriptions = TRUE) {
     # convert yearmonth to date
     dat <- dat %>% mutate(yearmonth = lubridate::ym(yearmonth))
 
-    # convert province code to ISO
-    dat <-
-      dat %>% mutate(
-        province = chinautils::provincename(province, origin = "china_customs")
-      )
-
     # sort
     dat %>% arrange(across(any_of(c(
       "yearmonth",

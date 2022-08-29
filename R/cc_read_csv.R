@@ -45,8 +45,7 @@ cc_read_csv <- function(paths,  drop_descriptions = TRUE) {
     )
 
     # drop redundant descriptions
-    if (drop_descriptions)
-      dat <- dat %>% select(!ends_with("_name"))
+    if (drop_descriptions) dat <- dat %>% select(!ends_with("_name"))
 
     # convert yearmonth to date
     dat <- dat %>% mutate(yearmonth = lubridate::ym(yearmonth))

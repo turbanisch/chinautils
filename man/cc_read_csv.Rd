@@ -15,7 +15,7 @@ cc_read_csv(paths, drop_descriptions = TRUE)
 A tibble
 }
 \description{
-This is a function to read CSV files downloaded from China Customs with the correct encoding and column type specification, no matter which columns are present in the data, their order and the language. The function harmonizes column names between English and Chinese files, converts dates and adds an ISO3 identifier for Chinese provinces.
+This is a function to read CSV files downloaded from China Customs with the correct encoding and column type specification, no matter which columns are present in the data, their order and the language. The function harmonizes column names between English and Chinese files and converts dates.
 }
 \details{
 Note that this function does not perform any sanity checks on the data, so make sure no individual CSV file was cut off after 10,000 lines. The function expects (and ignores) a trailing comma in each line of the CSV file which is normally added by China Customs. The order of columns has to be the same across files.

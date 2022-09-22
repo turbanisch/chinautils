@@ -31,8 +31,6 @@ English, German or Chinese to ISO codes and other output formats, such
 as those used by China Customs.
 
 ``` r
-library(chinautils)
-
 provincename("Innere Mongolei")
 #> [1] "CN-NM"
 provincename("Hong Kong", destination = "full_name_zh")

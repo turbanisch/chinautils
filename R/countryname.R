@@ -64,7 +64,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
 
   # remove duplicates and set NA in case of multiple matches
   matches <- matches %>%
-    mutate(across(c(regex, iso3c), ~if_else(sourcevar %in% dupes, NA_character_, .x))) %>%
+    mutate(across(any_of(c(origin, destination)), ~if_else(sourcevar %in% dupes, NA_character_, .x))) %>%
     distinct()
 
   # compute successful matches for messages to user
@@ -74,8 +74,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   if (n_success == 0L) {
     # x for failure
     cli::cli_inform(c(
-      "x" = "Matched {n_success} out of {length(sourcevar)} value{?s}.",
-      "i" = "Counting only unambiguous matches of unique values."))
+      "x" = "Matched {n_success} out of {length(sourcevar)} value{?s}."))
   } else{
     # v for success
     cli::cli_inform(c(

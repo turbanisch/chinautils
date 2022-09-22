@@ -1,4 +1,4 @@
-#' Harmonize Country Names
+#' Harmonize Country Names in Chinese
 #'
 #' @param sourcevar Vector which contains the codes or country names to be
 #'   converted (character or factor)
@@ -69,27 +69,18 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
 
   # compute successful matches for messages to user
   n_success <- matches %>% filter(if_all(destination, ~!is.na(.x))) %>% nrow()
+  n_failure <- length(sourcevar) - n_success
 
   # inform user about missings and duplicates
-  if (n_success == 0L) {
-    # x for failure
-    cli::cli_inform(c(
-      "x" = "Matched {n_success} out of {length(sourcevar)} value{?s}."))
-  } else{
-    # v for success
-    cli::cli_inform(c(
-      "v" = "Matched {n_success} out of {length(sourcevar)} value{?s}.",
-      "i" = "Counting only unambiguous matches of unique values."))
-
-    if (length(no_match) > 0) cli::cli_inform(c("x" = "Did not find matches for {no_match}."))
-
-    if (length(dupes) > 0) {
-      cli::cli_inform(c(
-        "x" = "Found multiple matches for {dupes}.",
-        "i" = "Values with multiple matches were converted to NA."))
-    } else {
-      cli::cli_inform(c("v" = "No value had multiple matches."))
-    }
+  if (n_failure == 0) {
+    cli::cli_alert_success("Matched {n_success} out of {length(sourcevar)} unique value{?s} unambiguously.")
+  }
+  else {
+    cli::cli_alert_danger("Matched {n_success} out of {length(sourcevar)} unique value{?s} unambiguously.")
+    if (length(no_match) > 0)
+      cli::cli_alert_info("No match could be found for {no_match}.")
+    if (length(dupes) > 0)
+      cli::cli_alert_info("Multiple matches were found for {dupes}. ")
   }
 
   # return matches of full (non-unique) sourcevar from the beginning

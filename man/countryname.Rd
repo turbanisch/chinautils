@@ -2,7 +2,7 @@
 % Please edit documentation in R/countryname.R
 \name{countryname}
 \alias{countryname}
-\title{Harmonize Country Names}
+\title{Harmonize Country Names in Chinese}
 \usage{
 countryname(sourcevar, origin = "regex", destination = "iso3c")
 }
@@ -21,7 +21,7 @@ If not specified, ISO3 codes will be used.}
 A character vector
 }
 \description{
-Harmonize Country Names
+Harmonize Country Names in Chinese
 }
 \examples{
 # match both simplified and traditional Chinese

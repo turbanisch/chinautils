@@ -29,5 +29,12 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     as_tibble() %>%
     join_fun(chinautils::country_dict, by = c("value" = origin))
 
+  # check multiple matches
+  multiple_matches <- matches %>%
+    count(value) %>%
+    filter(n > 1)
+
+  # message which names could not be matched
+
   matches %>% pull(all_of(destination))
 }

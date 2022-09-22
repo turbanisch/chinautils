@@ -26,48 +26,63 @@
 #' countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
 countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   stopifnot(is.character(sourcevar))
-  stopifnot(origin %in% colnames(chinautils::country_dict))
-  stopifnot(destination %in% colnames(chinautils::country_dict))
 
+  # keep only relevant columns
+  country_dict <- chinautils::country_dict %>% select(all_of(c(origin, destination)))
+
+  # make a copy, apply conversion to the full vector at the very end
+  full_sourcevar <- sourcevar
+
+  # reduce to unique values (to help identify 1:m merges later)
+  sourcevar <- unique(sourcevar)
 
   if (origin == "regex") {
     # simplify Chinese + fuzzy matching
-    sourcevar <- ropencc::converter(ropencc::T2S)[sourcevar]
+    merge_key <- ropencc::converter(ropencc::T2S)[sourcevar]
     join_fun <- fuzzyjoin::regex_left_join
   } else {
     # use exact matching
     join_fun <- dplyr::left_join
+    merge_key <- sourcevar
   }
 
-  # reduce to unique values (to help identify 1:m merges later)
-  dict <- unique(sourcevar)
+  # keep simplified and original values side-by-side
+  conversion_table <- tibble(sourcevar, merge_key)
 
   # merge matching entries from dict
-  matches <- dict %>%
-    as_tibble() %>%
-    join_fun(chinautils::country_dict, by = c("value" = origin))
+  matches <- conversion_table %>%
+    join_fun(country_dict, by = c(merge_key = origin))
 
-  # check no match
-  no_match <- matches %>% filter(is.na(short_name_en)) %>% pull(value)
+  # check no match (before converting duplicates to NA)
+  no_match <- matches %>% filter(if_all(destination, is.na)) %>% pull(sourcevar)
 
   # identify multiple matches
   dupes <- matches %>%
-    count(value) %>%
+    count(sourcevar) %>%
     filter(n > 1) %>%
-    pull(value)
+    pull(sourcevar)
 
   # remove duplicates and set NA in case of multiple matches
   matches <- matches %>%
-    mutate(across(!value, ~if_else(value %in% dupes, NA_character_, .x))) %>%
+    mutate(across(c(regex, iso3c), ~if_else(sourcevar %in% dupes, NA_character_, .x))) %>%
     distinct()
 
-  # inform user about missings and duplicates
-  if (length(no_match) == length(dict)) {
-    cli::cli_inform(c("x" = "Matched {length(dict) - length(no_match)} out of {length(dict)} value{?s}."))
-  } else{
-    cli::cli_inform(c("v" = "Matched {length(dict) - length(no_match)} out of {length(dict)} value{?s}."))
+  # compute successful matches for messages to user
+  n_success <- matches %>% filter(if_all(destination, ~!is.na(.x))) %>% nrow()
 
-    if (length(no_match) > 0) cli::cli_inform(c("x" = "Could not match {no_match}."))
+  # inform user about missings and duplicates
+  if (n_success == 0L) {
+    # x for failure
+    cli::cli_inform(c(
+      "x" = "Matched {n_success} out of {length(sourcevar)} value{?s}.",
+      "i" = "Counting only unambiguous matches of unique values."))
+  } else{
+    # v for success
+    cli::cli_inform(c(
+      "v" = "Matched {n_success} out of {length(sourcevar)} value{?s}.",
+      "i" = "Counting only unambiguous matches of unique values."))
+
+    if (length(no_match) > 0) cli::cli_inform(c("x" = "Did not find matches for {no_match}."))
 
     if (length(dupes) > 0) {
       cli::cli_inform(c(
@@ -78,9 +93,9 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     }
   }
 
-  # build conversion table from unique values, apply to full vector
-  conversion_table <- matches %>% pull(all_of(destination)) %>% rlang::set_names(dict)
-
-  # return
-  stringr::str_replace_all(sourcevar, conversion_table)
+  # return matches of full (non-unique) sourcevar from the beginning
+  matches %>%
+    select(sourcevar, all_of(destination)) %>%
+    right_join(tibble(sourcevar = full_sourcevar), by = "sourcevar") %>%
+    pull(all_of(destination))
 }

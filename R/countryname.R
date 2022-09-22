@@ -39,8 +39,11 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     join_fun <- dplyr::left_join
   }
 
+  # reduce to unique values (to help identify 1:m merges later)
+  dict <- unique(sourcevar)
+
   # merge matching entries from dict
-  matches <- sourcevar %>%
+  matches <- dict %>%
     as_tibble() %>%
     join_fun(chinautils::country_dict, by = c("value" = origin))
 
@@ -59,10 +62,10 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     distinct()
 
   # inform user about missings and duplicates
-  if (length(no_match) == length(sourcevar)) {
-    cli::cli_inform(c("x" = "Matched {length(sourcevar) - length(no_match)} out of {length(sourcevar)} value{?s}."))
+  if (length(no_match) == length(dict)) {
+    cli::cli_inform(c("x" = "Matched {length(dict) - length(no_match)} out of {length(dict)} value{?s}."))
   } else{
-    cli::cli_inform(c("v" = "Matched {length(sourcevar) - length(no_match)} out of {length(sourcevar)} value{?s}."))
+    cli::cli_inform(c("v" = "Matched {length(dict) - length(no_match)} out of {length(dict)} value{?s}."))
 
     if (length(no_match) > 0) cli::cli_inform(c("x" = "Could not match {no_match}."))
 
@@ -75,6 +78,9 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     }
   }
 
+  # build conversion table from unique values, apply to full vector
+  conversion_table <- matches %>% pull(all_of(destination)) %>% rlang::set_names(dict)
+
   # return
-  matches %>% pull(all_of(destination))
+  stringr::str_replace_all(sourcevar, conversion_table)
 }

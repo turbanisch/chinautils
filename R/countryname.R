@@ -1,14 +1,29 @@
-#' Harmonize (Chinese) Country Names
+#' Harmonize Country Names
 #'
-#' @param sourcevar
-#' @param origin
-#' @param destination
+#' @param sourcevar Vector which contains the codes or country names to be
+#'   converted (character or factor)
+#' @param origin A string which identifies the coding scheme of origin (e.g.,
+#'   `"short_name_zh_cn"`). See `chinautils::country_dict` for a list of available codes. If not specified, the country name in Chinese (simplified or traditional) will be matched via regular expressions. Otherwise the match needs to be an exact match (i.e., not just a partial one).
+#' @param destination A string which identify the coding
+#'   scheme of destination (e.g., `"short_name_en"`). See `chinautils::country_dict` for a list of available codes.
+#'   If not specified, ISO3 codes will be used.
 #'
-#' @return
+#' @return A character vector
 #' @export
 #' @import dplyr
 #'
 #' @examples
+#' # match both simplified and traditional Chinese
+#' countryname(c("德国", "德國"))
+#'
+#' # regex ignore languages other than Chinese and ambiguous cases
+#' countryname(c("ドイツ国", "刚果"))
+#'
+#' # get warned about potential pitfalls, such as multiple matches
+#' countryname(c("塞尔维亚和黑山", "捷克斯洛伐克", "德国德国"))
+#'
+#' # non-regex matching requires an exact match
+#' countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
 countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   stopifnot(is.character(sourcevar))
   stopifnot(origin %in% colnames(chinautils::country_dict))

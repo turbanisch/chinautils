@@ -11,9 +11,8 @@
 #' @param sourcevar Vector which contains the codes or province names to be
 #'   converted (character or factor)
 #' @param origin A string which identifies the coding scheme of origin (e.g.,
-#'   `"china_customs"`). If not specified, the province name in English, German
-#'   or Chinese will be captured by regex. Otherwise the match needs to be
-#'   exact. See `chinautils::province_dict` for a list of available codes.
+#'   `"china_customs"`). See `chinautils::province_dict` for a list of available codes.
+#'   If not specified, the province name in English, German or Chinese will be matched via regular expressions. Otherwise the match needs to be an exact match (i.e., not just a partial one).
 #' @param destination A string or vector of strings which identify the coding
 #'   scheme of destination (e.g., `"type"` or `c("gb_2260", "full_name_zh")`).
 #'   If not specified, ISO codes will be used. See `chinautils::province_dict`

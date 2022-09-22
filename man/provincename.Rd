@@ -11,9 +11,8 @@ provincename(sourcevar, origin = "regex", destination = "iso_3166_2", ...)
 converted (character or factor)}
 
 \item{origin}{A string which identifies the coding scheme of origin (e.g.,
-\code{"china_customs"}). If not specified, the province name in English, German
-or Chinese will be captured by regex. Otherwise the match needs to be
-exact. See \code{chinautils::province_dict} for a list of available codes.}
+\code{"china_customs"}). See \code{chinautils::province_dict} for a list of available codes.
+If not specified, the province name in English, German or Chinese will be matched via regular expressions. Otherwise the match needs to be an exact match (i.e., not just a partial one).}
 
 \item{destination}{A string or vector of strings which identify the coding
 scheme of destination (e.g., \code{"type"} or \code{c("gb_2260", "full_name_zh")}).

@@ -32,7 +32,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
 
   if (origin == "regex") {
     # simplify Chinese + fuzzy matching
-    sourcevar <- ropencc::converter(T2S)[sourcevar]
+    sourcevar <- ropencc::converter(ropencc::T2S)[sourcevar]
     join_fun <- fuzzyjoin::regex_left_join
   } else {
     # use exact matching

@@ -34,6 +34,23 @@ You can install the development version of chinautils from [GitHub](https://gith
 devtools::install_github("turbanisch/chinautils")
 ```
 
+## Harmonize country names (in Chinese)
+
+```{r}
+# match both simplified and traditional Chinese
+countryname(c("德国", "德國"))
+
+# regex ignore languages other than Chinese and ambiguous cases
+countryname(c("ドイツ国", "刚果"))
+
+# get warned about potential pitfalls, such as multiple matches
+countryname(c("塞尔维亚和黑山", "捷克斯洛伐克", "德国德国"))
+
+# non-regex matching requires an exact match
+countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
+```
+
+
 ## Harmonize province codes 
 
 The names of Chinese provinces may vary between data sources: Inner Mongolia might come as "Inner Mongol", "Inner Mongolia Autonomous Region", "内蒙古", "内蒙古自治区", "Nei Menggu" or "Nei Menggu Zizhiqu", making it hard to merge province-level data. 

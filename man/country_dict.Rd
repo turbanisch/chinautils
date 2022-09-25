@@ -5,28 +5,34 @@
 \alias{country_dict}
 \title{Concordance table of country names and codes.}
 \format{
-A data frame with 34 rows and 12 variables:
+A data frame with 208 rows and 15 variables:
 \describe{
-\item{iso_3166_2}{province code according to ISO 3166-2:CN}
-\item{gb_2260}{province code according to Guobiao GB/T 2260}
-\item{short_name_}{province name, e.g., Chongqing}
-\item{full_name_}{province name including the administrative type, e.g., Chongqing Shi}
-\item{_en}{province name in English}
-\item{_zh}{province name in Chinese}
-\item{_py}{province name in Pinyin (the official romanization system for Chinese in Mainland China)}
-\item{regex}{regular expressions matching province names in English, German and Chinese}
-\item{type}{administrative type, e.g., municipality}
-\item{mainland}{Does the province belong to Mainland China? \code{FALSE} for Hong Kong, Macao and Taiwan, \code{TRUE} otherwise}
-\item{china_customs}{numeric code used by the General Administration of Customs of China}
+\item{short_name_en}{Short country name in English}
+\item{iso3c}{ISO3 character country code}
+\item{regex}{regular expressions to match short and full country names (as well as variants thereof) after conversion to simplified characters}
+\item{short_name_zh_}{Short country name in Chinese. See details for region codes.}
+\item{full_name_zh_}{Full (official) country name in Chinese. See details for region codes.}
 }
 }
 \source{
-\url{https://en.wikipedia.org/wiki/Provinces_of_China}
+\url{https://github.com/turbanisch/chinese-countryname-regex}
+\url{https://zh.wikipedia.org/wiki/世界政區索引}
 }
 \usage{
 country_dict
 }
 \description{
-A dataset containing the names and codes of China's provinces as well as regular expressions to match province names in English, German and Chinese.
+A dataset containing country names in Chinese and regular expressions to match them. Each set of names in Chinese includes short and full country names in simplified and traditional scripts as used in Mainland China, Malaysia, Singapore, Hong Kong, Macau and Taiwan. The dataset additionally includes English (short) country names and ISO3 codes for harmonization purposes.
+}
+\details{
+\tabular{lll}{
+   Code \tab Description (Chinese) \tab Description (English) \cr
+   cn \tab 大陆简体 \tab Mainland (simplified) \cr
+   hk \tab 香港繁體 \tab Hong Kong (traditional) \cr
+   mo \tab 澳門繁體 \tab Macau (traditional) \cr
+   my \tab 大马简体 \tab Malaysia (simplified) \cr
+   sg \tab 新加坡简体 \tab Singapore (simplified) \cr
+   tw \tab 臺灣正體 \tab Taiwan (traditional) \cr
+}
 }
 \keyword{datasets}

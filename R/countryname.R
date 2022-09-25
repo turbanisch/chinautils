@@ -1,5 +1,7 @@
 #' Harmonize Country Names in Chinese
 #'
+#' This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
+#'
 #' @param sourcevar Vector which contains the codes or country names to be
 #'   converted (character or factor)
 #' @param origin A string which identifies the coding scheme of origin (e.g.,

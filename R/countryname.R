@@ -76,7 +76,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     cli::cli_alert_success("Matched {n_success} out of {length(sourcevar)} unique value{?s} unambiguously.")
   }
   else {
-    cli::cli_alert_danger("Matched {n_success} out of {length(sourcevar)} unique value{?s} unambiguously.")
+    cli::cli_alert_danger("Failed to match {n_failure} out of {length(sourcevar)} unique value{?s} unambiguously.")
     if (length(no_match) > 0)
       cli::cli_alert_info("No match could be found for {no_match}.")
     if (length(dupes) > 0)

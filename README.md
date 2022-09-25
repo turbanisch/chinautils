@@ -59,24 +59,24 @@ both simplified and traditional Chinese:
 ``` r
 # match variants in both simplified and traditional Chinese
 countryname(c("中国", "中华人民共和国", "亞東開化中國早"))
-#> ✔ Matched 3 out of 3 unique values unambiguously.
+#> ✔ Matched 3 out of 3 values.
 #> [1] "CHN" "CHN" "CHN"
 
 # regex ignore languages other than Chinese and ambiguous cases
 countryname(c("ドイツ国", "刚果"))
-#> ✖ Failed to match 2 out of 2 unique values unambiguously.
+#> ✖ Failed to match 2 out of 2 values.
 #> ℹ No match could be found for ドイツ国 and 刚果.
 #> [1] NA NA
 
 # get warned about potential pitfalls, such as multiple matches
 countryname(c("塞尔维亚和黑山", "捷克斯洛伐克", "德国德国"))
-#> ✖ Failed to match 2 out of 3 unique values unambiguously.
+#> ✖ Failed to match 2 out of 3 values.
 #> ℹ Multiple matches were found for 塞尔维亚和黑山 and 捷克斯洛伐克.
 #> [1] NA    NA    "DEU"
 
 # non-regex matching requires an exact match
 countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
-#> ✖ Failed to match 1 out of 2 unique values unambiguously.
+#> ✖ Failed to match 1 out of 2 values.
 #> ℹ No match could be found for 德国人.
 #> [1] "Germany" NA
 ```

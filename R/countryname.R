@@ -2,7 +2,9 @@
 #'
 #' This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
 #'
-#' @note Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
+#' @source Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
+#'
+#' @note The message informing about the number of successful conversions refers to unique values of the `origin` vector. Character variants (think: simplified vs. traditional) are counted as two distinct values. A resulting missing value is due to one of two reasons: either there was no match or there were multiple matches and thus the result was ambiguous. Additional info messages inform the user about each case.
 #'
 #' @param sourcevar Vector which contains the codes or country names to be
 #'   converted (character or factor)
@@ -77,10 +79,10 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
 
   # inform user about missings and duplicates
   if (n_failure == 0) {
-    cli::cli_alert_success("Matched {n_success} out of {length(sourcevar)} unique value{?s} unambiguously.")
+    cli::cli_alert_success("Matched {n_success} out of {length(sourcevar)} value{?s}.")
   }
   else {
-    cli::cli_alert_danger("Failed to match {n_failure} out of {length(sourcevar)} unique value{?s} unambiguously.")
+    cli::cli_alert_danger("Failed to match {n_failure} out of {length(sourcevar)} value{?s}.")
     if (length(no_match) > 0)
       cli::cli_alert_info("No match could be found for {no_match}.")
     if (length(dupes) > 0)

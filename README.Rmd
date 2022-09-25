@@ -44,7 +44,8 @@ This is especially true for proper names like country names. Not only can they v
 2. **Different transliterations**. Many country names have been phonetically adapted from other languages and translators in every Chinese-speaking region have taken their artistic liberties when doing so. For example, Hong Kongers refer to Barbados as *Babaduosi* 巴巴多斯 whereas people from Taiwan call it *Babeiduo* 巴貝多.
 3. **Alternative names**. Instead of adapting a country name according to its sound, Chinese-speaking people in some regions have also opted to convert the original meaning of the country name into Chinese. For example, Montenegro is *Heishan* 黑山 ("black mountain") in Mainland China. People on Taiwan, on the other hand, kept their phonetic transliteration *Mengteneigeluo* 蒙特內哥羅.
 
-The function `countryname` identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese:
+The function `countryname` identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. 
+It uses regular expressions to match country name variants in both simplified and traditional Chinese:
     
 ```{r}
 # match variants in both simplified and traditional Chinese

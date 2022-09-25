@@ -3,6 +3,9 @@
 \name{countryname}
 \alias{countryname}
 \title{Harmonize Country Names in Chinese}
+\source{
+Methodology and code for the conversion table can be found in \href{https://github.com/turbanisch/chinese-countryname-regex}{this repo}.
+}
 \usage{
 countryname(sourcevar, origin = "regex", destination = "iso3c")
 }
@@ -24,7 +27,7 @@ A character vector
 This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
 }
 \note{
-Methodology and code for the conversion table can be found in \href{https://github.com/turbanisch/chinese-countryname-regex}{this repo}.
+The message informing about the number of successful conversions refers to unique values of the \code{origin} vector. Character variants (think: simplified vs. traditional) are counted as two distinct values. A resulting missing value is due to one of two reasons: either there was no match or there were multiple matches and thus the result was ambiguous. Additional info messages inform the user about each case.
 }
 \examples{
 # match variants in both simplified and traditional Chinese

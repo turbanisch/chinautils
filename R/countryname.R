@@ -2,7 +2,7 @@
 #'
 #' This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
 #'
-#' @note Methodology and code for the conversion table can be found on [GitHub](https://github.com/turbanisch/chinese-countryname-regex).
+#' @note Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
 #'
 #' @param sourcevar Vector which contains the codes or country names to be
 #'   converted (character or factor)

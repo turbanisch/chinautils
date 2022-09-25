@@ -24,7 +24,7 @@ A character vector
 This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
 }
 \note{
-Methodology and code for the conversion table can be found on \href{https://github.com/turbanisch/chinese-countryname-regex}{GitHub}.
+Methodology and code for the conversion table can be found in \href{https://github.com/turbanisch/chinese-countryname-regex}{this repo}.
 }
 \examples{
 # match variants in both simplified and traditional Chinese

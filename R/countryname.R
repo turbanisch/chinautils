@@ -34,6 +34,8 @@
 #' countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
 countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   stopifnot(is.character(sourcevar))
+  stopifnot(length(origin) == 1L)
+  stopifnot(length(destination) == 1L)
 
   # keep only relevant columns
   country_dict <- chinautils::country_dict %>% select(all_of(c(origin, destination)))

@@ -4,6 +4,8 @@
 #'
 #' @source Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
 #'
+#' @note In the case of regex matching, the input is converted to simplified characters using [OpenCC](https://github.com/BYVoid/OpenCC) first.
+#'
 #' @note The message informing about the number of successful conversions refers to unique values of the input vector. Character variants (think: simplified vs. traditional) are counted as two distinct values. A resulting missing value is due to one of two reasons: either there was no match or there were multiple matches and thus the result was ambiguous. Additional info messages inform the user about each cause.
 #'
 #' @param sourcevar Vector which contains the codes or country names to be

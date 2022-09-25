@@ -27,6 +27,8 @@ A character vector
 This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
 }
 \note{
+In the case of regex matching, the input is converted to simplified characters using \href{https://github.com/BYVoid/OpenCC}{OpenCC} first.
+
 The message informing about the number of successful conversions refers to unique values of the input vector. Character variants (think: simplified vs. traditional) are counted as two distinct values. A resulting missing value is due to one of two reasons: either there was no match or there were multiple matches and thus the result was ambiguous. Additional info messages inform the user about each cause.
 }
 \examples{

@@ -60,6 +60,7 @@ countryname(c("塞尔维亚和黑山", "捷克斯洛伐克", "德国德国"))
 countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
 ```
 
+Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
 
 ## Harmonize province codes 
 

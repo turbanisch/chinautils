@@ -81,6 +81,9 @@ countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination =
 #> [1] "Germany" NA
 ```
 
+Methodology and code for the conversion table can be found in [this
+repo](https://github.com/turbanisch/chinese-countryname-regex).
+
 ## Harmonize province codes
 
 The names of Chinese provinces may vary between data sources: Inner

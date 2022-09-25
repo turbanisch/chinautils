@@ -13,8 +13,8 @@
 #' @import dplyr
 #'
 #' @examples
-#' # match both simplified and traditional Chinese
-#' countryname(c("德国", "德國"))
+#' # match variants in both simplified and traditional Chinese
+#' countryname(c("中国", "中华人民共和国", "亞東開化中國早"))
 #'
 #' # regex ignore languages other than Chinese and ambiguous cases
 #' countryname(c("ドイツ国", "刚果"))

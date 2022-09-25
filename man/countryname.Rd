@@ -21,11 +21,14 @@ If not specified, ISO3 codes will be used.}
 A character vector
 }
 \description{
-Harmonize Country Names in Chinese
+This function identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese.
+}
+\note{
+Methodology and code for the conversion table can be found on \href{https://github.com/turbanisch/chinese-countryname-regex}{GitHub}.
 }
 \examples{
-# match both simplified and traditional Chinese
-countryname(c("德国", "德國"))
+# match variants in both simplified and traditional Chinese
+countryname(c("中国", "中华人民共和国", "亞東開化中國早"))
 
 # regex ignore languages other than Chinese and ambiguous cases
 countryname(c("ドイツ国", "刚果"))

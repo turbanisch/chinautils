@@ -36,6 +36,16 @@ devtools::install_github("turbanisch/chinautils")
 
 ## Harmonize country names (in Chinese)
 
+Coming up with regular expressions to match country names in Chinese is slightly more involved than for other languages. The reason is that different parts of the world use different variants of Chinese, beyond the basic distinction between simplified and traditional characters. Mainland China, Malaysia and Singapore all use simplified characters whereas Hong Kong, Macau and Taiwan continue to use traditional characters -- but local usage may vary within each group. 
+
+This is especially true for proper names like country names. Not only can they vary character by character depending on the script that is used, but they might also reflect different (phonetic) transliterations or refer to another name altogether. Here are some examples for each case:
+
+1. **Different scripts.** Germany is referred to as *Deguo* 德国 in Mainland China and 德國 in Taiwan -- where 国 is the simplified character corresponding to 國, easy. However, there are some less obvious cases, as we will see below.
+2. **Different transliterations**. Many country names have been phonetically adapted from other languages and translators in every Chinese-speaking region have taken their artistic liberties when doing so. For example, Hong Kongers refer to Barbados as *Babaduosi* 巴巴多斯 whereas people from Taiwan call it *Babeiduo* 巴貝多.
+3. **Alternative names**. Instead of adapting a country name according to its sound, Chinese-speaking people in some regions have also opted to convert the original meaning of the country name into Chinese. For example, Montenegro is *Heishan* 黑山 ("black mountain") in Mainland China. People on Taiwan, on the other hand, kept their phonetic transliteration *Mengteneigeluo* 蒙特內哥羅.
+
+The function `countryname` identifies country names in Chinese and converts them to various standardized output formats, such as ISO3 codes. It uses regular expressions to match country name variants in both simplified and traditional Chinese:
+    
 ```{r}
 # match variants in both simplified and traditional Chinese
 countryname(c("中国", "中华人民共和国", "亞東開化中國早"))

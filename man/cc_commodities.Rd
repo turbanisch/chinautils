@@ -5,7 +5,7 @@
 \alias{cc_commodities}
 \title{China Customs commodity codes}
 \format{
-A data frame with 60,726 rows and 4 variables:
+A data frame with 77,320 rows and 4 variables:
 \describe{
 \item{code}{commodity code}
 \item{year}{year}

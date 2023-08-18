@@ -53,7 +53,7 @@
 #'
 #' Note that the usage of codes varies by year. China Customs does not indicate which HS revision its statistics are based on but a small-n investigation suggests that the latest version is used for each record.
 #'
-#' @format A data frame with 60,726 rows and 4 variables:
+#' @format A data frame with 77,320 rows and 4 variables:
 #' \describe{
 #'   \item{code}{commodity code}
 #'   \item{year}{year}

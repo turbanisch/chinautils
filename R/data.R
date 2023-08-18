@@ -45,6 +45,24 @@
 #' @source \url{https://en.wikipedia.org/wiki/Provinces_of_China}
 "province_dict"
 
+#' China Customs commodity codes
+#'
+#' A dataset containing all commodity descriptions used by China Customs in English and Chinese, including their codes.
+#'
+#' This dataset only contains codes at 8-digit level because codes at 2, 4, and 6-digit level are standardized internationally. Use `concordance::get_desc()` to retrieve descriptions for those. China Customs further subdivides the 8-digit codes reported in this dataset into 10-digit codes.
+#'
+#' Note that the usage of codes varies by year. China Customs does not indicate which HS revision its statistics are based on but a small-n investigation suggests that the latest version is used for each record.
+#'
+#' @format A data frame with 60,726 rows and 4 variables:
+#' \describe{
+#'   \item{code}{commodity code}
+#'   \item{year}{year}
+#'   \item{en}{English commodity description}
+#'   \item{zh}{Chinese commodity description}
+#' }
+#' @source \url{43.248.49.97/indexEn}
+"cc_commodities"
+
 #' China Customs customs regime names
 #'
 #' A dataset containing all customs regime names used by China Customs in English and Chinese, including their codes.

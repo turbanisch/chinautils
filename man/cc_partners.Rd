@@ -21,9 +21,9 @@ A data frame with 51,769 rows and 4 variables:
 }
 }
 \source{
-\url{43.248.49.97/indexEn}
+\url{http://stats.customs.gov.cn/indexEn}
 
-\url{43.248.49.97/indexEn}
+\url{http://stats.customs.gov.cn/indexEn}
 }
 \usage{
 cc_partners

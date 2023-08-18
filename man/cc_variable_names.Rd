@@ -14,7 +14,7 @@ A data frame with 15 rows and 4 variables:
 }
 }
 \source{
-\url{43.248.49.97/indexEn}
+\url{http://stats.customs.gov.cn/indexEn}
 }
 \usage{
 cc_variable_names

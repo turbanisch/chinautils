@@ -13,7 +13,7 @@ A data frame with 20 rows and 3 variables:
 }
 }
 \source{
-\url{43.248.49.97/indexEn}
+\url{http://stats.customs.gov.cn/indexEn}
 }
 \usage{
 cc_regimes

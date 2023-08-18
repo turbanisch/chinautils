@@ -60,7 +60,7 @@
 #'   \item{en}{English commodity description}
 #'   \item{zh}{Chinese commodity description}
 #' }
-#' @source \url{43.248.49.97/indexEn}
+#' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_commodities"
 
 #' China Customs customs regime names
@@ -73,7 +73,7 @@
 #'   \item{en}{English customs regime name}
 #'   \item{zh}{Chinese customs regime name}
 #' }
-#' @source \url{43.248.49.97/indexEn}
+#' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_regimes"
 
 #' China Customs variable names
@@ -87,7 +87,7 @@
 #'   \item{zh}{Chinese variable name}
 #'   \item{col_type}{single character denoting the column type, used to generate a column type specification for parsing data}
 #' }
-#' @source \url{43.248.49.97/indexEn}
+#' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_variable_names"
 
 #' China Customs trading partner names
@@ -100,7 +100,7 @@
 #'   \item{en}{English trading partner name}
 #'   \item{zh}{Chinese trading partner name}
 #' }
-#' @source \url{43.248.49.97/indexEn}
+#' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_partners"
 
 #' China Customs commodity descriptions
@@ -114,5 +114,5 @@
 #'   \item{en}{English commodity name}
 #'   \item{zh}{Chinese commodity name}
 #' }
-#' @source \url{43.248.49.97/indexEn}
+#' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_partners"

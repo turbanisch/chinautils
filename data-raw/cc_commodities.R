@@ -1,6 +1,7 @@
 # include only 8-digit HS codes because other ones are standardized
 # CSV files of 6-digit codes are corrupted (nested quotation marks)
 # it is unclear which HS version China Customs uses in a given year
+# small-n investigation indicates that current HS revision is used in each year, e.g., HS6 (2022 revision) starting in 2022
 
 library(tidyverse)
 
@@ -41,4 +42,4 @@ cc_commodities <- cc_commodities %>%
 cc_commodities <- cc_commodities %>% mutate(zh = str_replace_all(zh, ", ?", "，"))
 
 # save
-usethis::use_data(cc_commodities)
+usethis::use_data(cc_commodities, overwrite = TRUE)

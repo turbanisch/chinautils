@@ -12,50 +12,64 @@
 #' @import dplyr
 #' @import tidyr
 #' @import readr
-cc_read_csv <- function(paths,  drop_descriptions = TRUE) {
-  # glimpse at first row to determine which columns are present and which language is used
-  first_row <- read_csv(paths[1],
-                        n_max = 0L,
-                        locale = locale(encoding = "GB18030"),
-                        col_types = cols(.default = col_character()))
+cc_read_csv <- function(paths, drop_descriptions = TRUE) {
 
-    valid_colnames <- colnames(first_row %>% select(!starts_with("...")))
+  # define helper function for single file first, vectorize later
+  read_single_csv <- function(path) {
+
+    stopifnot(length(path) == 1L)
+
+    # glimpse at first row to determine which columns are present and which language is used
+    first_row <- read_csv(path,
+                          n_max = 0L,
+                          locale = locale(encoding = "GB18030"),
+                          col_types = cols(.default = col_character())) |>
+      # trailing comma leads to empty column, ignore
+      suppressMessages()
+
+    valid_colnames <- colnames(first_row |> select(!starts_with("...")))
     language <- if (any(stringr::str_detect(valid_colnames, "\\p{script=Han}"))) "zh" else "en"
 
-    # get list of colnames to replace (preserving their order)
-    clean_colnames <- tibble(valid_colnames) %>%
-      left_join(chinautils::cc_variable_names, by = c("valid_colnames" = language)) %>%
-      pull(clean_name)
+    # find replacements for column names and their colspec (preserving order)
+    lookup <- tibble(valid_colnames) |>
+      left_join(chinautils::cc_variable_names,
+                by = c("valid_colnames" = language),
+                # multiple matches from Chinese due to spelling variations in English
+                multiple = "any")
 
-    # get specification of column types
-    col_spec <- tibble(valid_colnames) %>%
-      left_join(chinautils::cc_variable_names, by = c("valid_colnames" = language)) %>%
-      pull(col_type) %>%
-      stringr::str_c(collapse = "")
+    clean_colnames <- lookup$clean_name
+    col_spec <- str_flatten(lookup$col_type)
 
-    # read all files
-    dat <- read_csv(
-      file = paths,
+    out <- read_csv(
+      file = path,
       na = "?",
       locale = locale(encoding = "GB18030"),
-      col_select = 1:length(valid_colnames),
-      col_types = col_spec,
-      col_names = clean_colnames,
-      skip = 1L
-    )
+      col_select = all_of(valid_colnames),
+      col_types = col_spec
+    ) |>
+      # trailing comma leads to empty column, ignore
+      suppressMessages()
 
-    # drop redundant descriptions
-    if (drop_descriptions) dat <- dat %>% select(!ends_with("_name"))
+    colnames(out) <- clean_colnames
+    out
+  }
 
-    # convert yearmonth to date
-    dat <- dat %>% mutate(yearmonth = lubridate::ym(yearmonth))
+  # vectorize
+  dat <- map(paths, read_single_csv) |>
+    list_rbind()
 
-    # sort
-    dat %>% arrange(across(any_of(c(
-      "yearmonth",
-      "partner",
-      "province",
-      "regime",
-      "commodity"
-    ))))
+  # drop redundant descriptions
+  if (drop_descriptions) dat <- dat |> select(!ends_with("_name"))
+
+  # convert yearmonth to date
+  dat <- dat|> mutate(yearmonth = lubridate::ym(yearmonth))
+
+  # sort
+  dat |> arrange(across(any_of(c(
+    "yearmonth",
+    "partner",
+    "province",
+    "regime",
+    "commodity"
+  ))))
 }

@@ -90,7 +90,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
     if (length(no_match) > 0)
       cli::cli_alert_info("No match could be found for {no_match}.")
     if (length(dupes) > 0)
-      cli::cli_alert_info("Multiple matches were found for {dupes}. ")
+      cli::cli_alert_info("Multiple matches were found for {dupes}.")
   }
 
   # return matches of full (non-unique) sourcevar from the beginning

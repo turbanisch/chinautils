@@ -94,8 +94,8 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   }
 
   # return matches of full (non-unique) sourcevar from the beginning
-  matches %>%
-    select(sourcevar, all_of(destination)) %>%
-    right_join(tibble(sourcevar = full_sourcevar), by = "sourcevar") %>%
+  # must use `full_sourcevar` on LHS to preserve row order
+  tibble(sourcevar = full_sourcevar) |> 
+    left_join(matches, join_by(sourcevar)) |> 
     pull(all_of(destination))
 }

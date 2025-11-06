@@ -32,7 +32,11 @@
 #'
 #' # non-regex matching requires an exact match
 #' countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
-countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
+countryname <- function(
+  sourcevar, 
+  origin = "regex", 
+  destination = "iso3c"
+) {
   stopifnot(is.character(sourcevar))
   stopifnot(length(origin) == 1L)
   stopifnot(length(destination) == 1L)
@@ -95,7 +99,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
 
   # return matches of full (non-unique) sourcevar from the beginning
   # must use `full_sourcevar` on LHS to preserve row order
-  tibble(sourcevar = full_sourcevar) |> 
-    left_join(matches, join_by(sourcevar)) |> 
+  tibble(sourcevar = full_sourcevar) |>
+    left_join(matches, join_by(sourcevar)) |>
     pull(all_of(destination))
 }

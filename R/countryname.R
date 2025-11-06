@@ -78,27 +78,33 @@ countryname <- function(
 
   # remove duplicates and set NA in case of multiple matches
   matches <- matches |>
-    mutate(across(any_of(c(origin, destination)), ~if_else(sourcevar %in% dupes, NA_character_, .x))) |>
+    mutate(across(
+      any_of(c(origin, destination)),
+      \(x) if_else(sourcevar %in% dupes, NA_character_, x)
+    )) |>
     distinct()
 
   # compute successful matches for messages to user
-  n_success <- matches |> filter(if_all(destination, ~!is.na(.x))) |> nrow()
+  n_success <- matches |> filter(if_all(destination, \(x) !is.na(x))) |> nrow()
   n_failure <- length(sourcevar) - n_success
 
   # inform user about missings and duplicates
   if (n_failure == 0) {
-    cli::cli_alert_success("Matched {n_success} out of {length(sourcevar)} value{?s}.")
-  }
-  else {
+    cli::cli_alert_success(
+      "Matched {n_success} out of {length(sourcevar)} value{?s}."
+    )
+  } else {
     cli::cli_alert_danger("Failed to match {n_failure} out of {length(sourcevar)} value{?s}.")
-    if (length(no_match) > 0)
+    if (length(no_match) > 0) {
       cli::cli_alert_info("No match could be found for {no_match}.")
-    if (length(dupes) > 0)
+    }
+    if (length(dupes) > 0) {
       cli::cli_alert_info("Multiple matches were found for {dupes}.")
+    }
   }
 
   # return matches of full (non-unique) sourcevar from the beginning
-  # must use `full_sourcevar` on LHS to preserve row order
+  # must use `full_sourcevar` on LHS to preserve row order (i.e. no right_join)
   tibble(sourcevar = full_sourcevar) |>
     left_join(matches, join_by(sourcevar)) |>
     pull(all_of(destination))

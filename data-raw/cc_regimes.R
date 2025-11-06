@@ -10,19 +10,19 @@ zh <- read_csv("data-raw/china-customs-codes/regimes/zh-CustomsRegime.csv",
                col_select = 1:2,
                col_types = "cc")
 
-en <- en %>%
+en <- en |>
   rename(
     code = `Customs Regime code`,
     en = `Customs Regime`
-  ) %>%
+  ) |>
   mutate(en = str_to_lower(en))
 
-zh <- zh %>%
+zh <- zh |>
   rename(
     code = 贸易方式编码,
     zh = 贸易方式名称
   )
 
-cc_regimes <- en %>% left_join(zh)
+cc_regimes <- en |> left_join(zh)
 
 usethis::use_data(cc_regimes)

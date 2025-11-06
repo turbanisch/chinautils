@@ -38,7 +38,7 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   stopifnot(length(destination) == 1L)
 
   # keep only relevant columns
-  country_dict <- chinautils::country_dict %>% select(all_of(c(origin, destination)))
+  country_dict <- chinautils::country_dict |> select(all_of(c(origin, destination)))
 
   # make a copy, apply conversion to the full vector at the very end
   full_sourcevar <- sourcevar
@@ -60,25 +60,25 @@ countryname <- function(sourcevar, origin = "regex", destination = "iso3c") {
   conversion_table <- tibble(sourcevar, merge_key)
 
   # merge matching entries from dict
-  matches <- conversion_table %>%
+  matches <- conversion_table |>
     join_fun(country_dict, by = c(merge_key = origin))
 
   # check no match (before converting duplicates to NA)
-  no_match <- matches %>% filter(if_all(destination, is.na)) %>% pull(sourcevar)
+  no_match <- matches |> filter(if_all(destination, is.na)) |> pull(sourcevar)
 
   # identify multiple matches
-  dupes <- matches %>%
-    count(sourcevar) %>%
-    filter(n > 1) %>%
+  dupes <- matches |>
+    count(sourcevar) |>
+    filter(n > 1) |>
     pull(sourcevar)
 
   # remove duplicates and set NA in case of multiple matches
-  matches <- matches %>%
-    mutate(across(any_of(c(origin, destination)), ~if_else(sourcevar %in% dupes, NA_character_, .x))) %>%
+  matches <- matches |>
+    mutate(across(any_of(c(origin, destination)), ~if_else(sourcevar %in% dupes, NA_character_, .x))) |>
     distinct()
 
   # compute successful matches for messages to user
-  n_success <- matches %>% filter(if_all(destination, ~!is.na(.x))) %>% nrow()
+  n_success <- matches |> filter(if_all(destination, ~!is.na(.x))) |> nrow()
   n_failure <- length(sourcevar) - n_success
 
   # inform user about missings and duplicates

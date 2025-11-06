@@ -25,21 +25,21 @@ zh <- read_csv(paths_zh,
                col_select = 1:3,
                col_types = "cci")
 
-cc_commodities <- en %>% left_join(zh, by = c(CODES = "商品编码", YEAR = "年份"))
+cc_commodities <- en |> left_join(zh, by = c(CODES = "商品编码", YEAR = "年份"))
 
 # rename and reorder
-cc_commodities <- cc_commodities %>%
+cc_commodities <- cc_commodities |>
   rename(
     code = CODES,
     year = YEAR,
     en = DESCRIPTION,
     zh = 商品名称
-    ) %>%
+    ) |>
   relocate(code, year)
 
 
 # convert comma into Chinese comma
-cc_commodities <- cc_commodities %>% mutate(zh = str_replace_all(zh, ", ?", "，"))
+cc_commodities <- cc_commodities |> mutate(zh = str_replace_all(zh, ", ?", "，"))
 
 # save
 usethis::use_data(cc_commodities, overwrite = TRUE)

@@ -8,6 +8,6 @@ en <- read_csv("data-raw/china-customs-codes/partners/en-TradingPartner-cleaned-
 zh <- read_csv("data-raw/china-customs-codes/partners/zh-TradingPartner-cleaned-manually.csv",
                col_types = "cc")
 
-cc_partners <- en %>% left_join(zh)
+cc_partners <- en |> left_join(zh)
 
 usethis::use_data(cc_partners)

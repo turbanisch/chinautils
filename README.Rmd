@@ -91,12 +91,12 @@ df <- tibble(
 )
 
 # filter cartesian join by shortest distance
-df %>% 
+df |> 
   left_join(select(province_dict, short_name_en),
-            by = character(0)) %>% 
-  mutate(dist = stringdist::stringdist(misspelled, short_name_en)) %>% 
-  group_by(misspelled) %>% 
-  filter(min_rank(dist) == 1L) %>% 
+            by = character(0)) |> 
+  mutate(dist = stringdist::stringdist(misspelled, short_name_en)) |> 
+  group_by(misspelled) |> 
+  filter(min_rank(dist) == 1L) |> 
   ungroup()
 ```
 

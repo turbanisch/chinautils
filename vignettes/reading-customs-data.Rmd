@@ -1,0 +1,112 @@
+---
+title: "Reading China Customs trade data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading China Customs trade data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(chinautils)
+library(dplyr)
+```
+
+The [China Customs statistics portal](http://stats.customs.gov.cn/indexEn)
+lets you download trade data as CSV files. These files are awkward to read
+programmatically:
+
+- they are encoded as **GB18030**, not UTF-8;
+- column names come in **English or Chinese** depending on the interface
+  language, and you may end up with a mix if you download several queries;
+- the **set and order of columns depends on the query** -- a single-month
+  download has no date column, and the sort order changes the column order.
+
+`cc_read_csv()` hides all of this. It reads one or more files into a single
+tidy tibble with stable English column names.
+
+## A single file
+
+This package ships a few small example downloads. A "full" English query
+contains the date, the trade dimensions (commodity, partner, customs regime,
+province) and the value and quantity columns:
+
+```{r}
+path <- system.file("extdata", "english-full.csv", package = "chinautils")
+cc_read_csv(path)
+```
+
+Codes are kept as character vectors (so leading zeros survive), the date is
+parsed, and the value column is numeric.
+
+## Many files at once, in any language
+
+Pass a vector of paths to read and row-bind several files -- even if they are
+in different languages and have different columns. Here we combine an English
+file (with a month column) and a Chinese file (a multi-month aggregate, hence
+no month column):
+
+```{r}
+files <- system.file(
+  "extdata",
+  c("english-full.csv", "chinese-full.csv"),
+  package = "chinautils"
+)
+cc_read_csv(files)
+```
+
+The Chinese rows have a missing `yearmonth` and populate `value_cny` instead of
+`value_usd`: values reported in different currencies are deliberately kept in
+separate columns so they are never accidentally summed.
+
+## Single-month downloads
+
+If you download a single month, China Customs omits the date column entirely.
+`cc_read_csv()` handles this without complaint -- it simply returns a table
+without `yearmonth`:
+
+```{r}
+degen <- system.file("extdata", "english-degenerate.csv", package = "chinautils")
+cc_read_csv(degen)
+```
+
+## Re-attaching clean descriptions
+
+By default `cc_read_csv()` drops the descriptions that ship alongside each code,
+because they are redundant and frequently misspelled. Re-attach clean
+descriptions from the bundled lookup tables when you need them:
+
+```{r}
+trade <- cc_read_csv(path)
+
+trade |>
+  left_join(cc_partners, by = c("partner" = "code")) |>
+  select(partner, partner_en = en, value_usd)
+```
+
+Commodity descriptions are versioned by year, so join `cc_commodities` on both
+the commodity code and the year:
+
+```{r}
+trade |>
+  mutate(year = lubridate::year(yearmonth)) |>
+  left_join(cc_commodities, by = c("commodity" = "code", "year")) |>
+  distinct(commodity, year, en)
+```
+
+## Things to watch out for
+
+`cc_read_csv()` warns about two silent pitfalls of the download page:
+
+- **Truncation.** The portal caps a download at 10,000 rows. If a file has
+  exactly 10,000 data rows it may be incomplete, and you get a warning.
+- **Encoding.** If the column names cannot be decoded as GB18030 (for example
+  because a file was re-saved as UTF-8), `cc_read_csv()` stops with a clear
+  message; pass `encoding = "UTF-8"` to override the default.

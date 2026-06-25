@@ -1,0 +1,28 @@
+url: https://turbanisch.github.io/chinautils/
+
+template:
+  bootstrap: 5
+
+reference:
+- title: Read China Customs data
+  desc: >
+    Read and clean trade data exported from China Customs, handling encoding,
+    mixed English/Chinese columns and arbitrary column order.
+  contents:
+  - cc_read_csv
+- title: Harmonize names
+  desc: Convert Chinese country and province names to standardized codes.
+  contents:
+  - countryname
+  - provincename
+- title: Bundled datasets
+  desc: >
+    Reference tables used by the functions above and useful on their own,
+    e.g. to re-attach clean descriptions to customs codes.
+  contents:
+  - country_dict
+  - province_dict
+  - cc_commodities
+  - cc_partners
+  - cc_regimes
+  - cc_variable_names

@@ -1,13 +1,25 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# chinautils
+# chinautils <img src="man/figures/logo.png" align="right" height="139" alt="chinautils website" />
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/turbanisch/chinautils/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/turbanisch/chinautils/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 This package contains helper functions to make working with Chinese
-(administrative) data easier.
+(administrative) data easier. It does two things:
+
+- **Read trade data from China Customs** into a tidy table, taking care
+  of the encoding, the mix of English and Chinese column names, and the
+  varying set and order of columns (`cc_read_csv()`).
+- **Harmonize Chinese country and province names** across the different
+  scripts, transliterations and spellings used in Mainland China, Hong
+  Kong, Macau, Taiwan, Malaysia and Singapore (`countryname()` and
+  `provincename()`).
 
 ## Installation
 
@@ -17,6 +29,101 @@ You can install the development version of chinautils from
 ``` r
 # install.packages("devtools")
 devtools::install_github("turbanisch/chinautils")
+```
+
+## Read China Customs trade data
+
+Trade data exported from [China
+Customs](http://stats.customs.gov.cn/indexEn) comes as CSV files that
+are awkward to read: they use the GB18030 encoding, ship in English or
+Chinese (and you may end up mixing both if you download several
+queries), and the set and order of columns depends on the query.
+`cc_read_csv()` reads one or more of these files into a single tidy
+tibble with stable English column names – regardless of language, column
+order, or which columns happen to be present.
+
+``` r
+path <- system.file("extdata", "english-full.csv", package = "chinautils")
+cc_read_csv(path)
+#> # A tibble: 5 × 10
+#>   yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2
+#>   <date>     <chr>     <chr>   <chr>  <chr>         <dbl> <chr>         <dbl>
+#> 1 2026-01-01 29012920  110     10     44            81782 Kilogram          0
+#> 2 2026-01-01 29012920  121     10     44             5800 Kilogram          0
+#> 3 2026-01-01 29012920  133     10     31             3574 Kilogram          0
+#> 4 2026-01-01 29012920  143     15     61             1248 Kilogram          0
+#> 5 2026-01-01 29012920  412     10     37             1725 Kilogram          0
+#> # ℹ 2 more variables: unit_2 <chr>, value_usd <dbl>
+```
+
+You can pass several files at once – even mixing English and Chinese
+exports with different columns – and they are row-bound into one table:
+
+``` r
+files <- system.file(
+  "extdata",
+  c("english-full.csv", "chinese-full.csv"),
+  package = "chinautils"
+)
+cc_read_csv(files)
+#> # A tibble: 10 × 11
+#>    yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2
+#>    <date>     <chr>     <chr>   <chr>  <chr>         <dbl> <chr>         <dbl>
+#>  1 2026-01-01 29012920  110     10     44            81782 Kilogram          0
+#>  2 2026-01-01 29012920  121     10     44             5800 Kilogram          0
+#>  3 2026-01-01 29012920  133     10     31             3574 Kilogram          0
+#>  4 2026-01-01 29012920  143     15     61             1248 Kilogram          0
+#>  5 2026-01-01 29012920  412     10     37             1725 Kilogram          0
+#>  6 NA         29012920  110     10     44           214847 千克              0
+#>  7 NA         29012920  121     10     44            12577 千克              0
+#>  8 NA         29012920  133     10     21              100 千克              0
+#>  9 NA         29012920  133     10     31             6750 千克              0
+#> 10 NA         29012920  133     10     37               48 千克              0
+#> # ℹ 3 more variables: unit_2 <chr>, value_usd <dbl>, value_cny <dbl>
+```
+
+`cc_read_csv()` also warns about the silent pitfalls of the download
+page, such as files that were truncated at 10,000 rows or saved in an
+unexpected encoding.
+
+### Re-attaching clean labels
+
+By default, `cc_read_csv()` keeps only the numeric codes for
+commodities, partners, customs regimes and provinces and drops the
+descriptions that ship in the file, because they are redundant and often
+misspelled. Clean descriptions can be re-attached from the bundled
+lookup tables `cc_partners`, `cc_regimes` and `cc_commodities`:
+
+``` r
+library(dplyr)
+
+trade <- cc_read_csv(path)
+
+trade |>
+  left_join(cc_partners, by = c("partner" = "code")) |>
+  select(partner, partner_en = en, value_usd)
+#> # A tibble: 5 × 3
+#>   partner partner_en  value_usd
+#>   <chr>   <chr>           <dbl>
+#> 1 110     Hong Kong      315286
+#> 2 121     Macau           28579
+#> 3 133     South Korea    199307
+#> 4 143     Taiwan         234351
+#> 5 412     Chile            4137
+```
+
+Commodity descriptions change from year to year, so join
+`cc_commodities` on both the commodity code and the year:
+
+``` r
+trade |>
+  mutate(year = lubridate::year(yearmonth)) |>
+  left_join(cc_commodities, by = c("commodity" = "code", "year")) |>
+  distinct(commodity, year, en)
+#> # A tibble: 1 × 3
+#>   commodity  year en       
+#>   <chr>     <dbl> <chr>    
+#> 1 29012920   2026 Acetylene
 ```
 
 ## Harmonize country names (in Chinese)
@@ -125,13 +232,18 @@ df <- tibble(
 )
 
 # filter cartesian join by shortest distance
-df %>% 
+df |> 
   left_join(select(province_dict, short_name_en),
-            by = character(0)) %>% 
-  mutate(dist = stringdist::stringdist(misspelled, short_name_en)) %>% 
-  group_by(misspelled) %>% 
-  filter(min_rank(dist) == 1L) %>% 
+            by = character(0)) |> 
+  mutate(dist = stringdist::stringdist(misspelled, short_name_en)) |> 
+  group_by(misspelled) |> 
+  filter(min_rank(dist) == 1L) |> 
   ungroup()
+#> Warning: Using `by = character()` to perform a cross join was deprecated in dplyr 1.1.0.
+#> ℹ Please use `cross_join()` instead.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 #> # A tibble: 6 × 3
 #>   misspelled                            short_name_en   dist
 #>   <chr>                                 <chr>          <dbl>

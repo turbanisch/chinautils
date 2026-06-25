@@ -11,13 +11,16 @@
 #'| sg | 新加坡简体            | Singapore (simplified)  |
 #'| tw | 臺灣正體              | Taiwan (traditional)    |
 #'
+#' The Chinese name columns carry a region suffix (`_cn`, `_hk`, `_mo`, `_my`,
+#' `_sg`, `_tw`) as described in the table above.
+#'
 #' @format A data frame with 208 rows and 15 variables:
 #' \describe{
 #'   \item{short_name_en}{Short country name in English}
 #'   \item{iso3c}{ISO3 character country code}
 #'   \item{regex}{regular expressions to match short and full country names (as well as variants thereof) after conversion to simplified characters}
-#'   \item{short_name_zh_}{Short country name in Chinese. See details for region codes.}
-#'   \item{full_name_zh_}{Full (official) country name in Chinese. See details for region codes.}
+#'   \item{short_name_zh_cn, short_name_zh_hk, short_name_zh_mo, short_name_zh_my, short_name_zh_sg, short_name_zh_tw}{Short country name in Chinese, by region}
+#'   \item{full_name_zh_cn, full_name_zh_hk, full_name_zh_mo, full_name_zh_my, full_name_zh_sg, full_name_zh_tw}{Full (official) country name in Chinese, by region}
 #'   }
 #' @source
 #' \url{https://github.com/turbanisch/chinese-countryname-regex}
@@ -28,15 +31,16 @@
 #'
 #' A dataset containing the names and codes of China's provinces as well as regular expressions to match province names in English, German and Chinese.
 #'
+#' The `short_name_*` columns give the bare province name (e.g. Chongqing) and
+#' the `full_name_*` columns include the administrative type (e.g. Chongqing
+#' Shi); the `_en`, `_zh` and `_py` suffixes denote English, Chinese and Pinyin.
+#'
 #' @format A data frame with 34 rows and 12 variables:
 #' \describe{
 #'   \item{iso_3166_2}{province code according to ISO 3166-2:CN}
 #'   \item{gb_2260}{province code according to Guobiao GB/T 2260}
-#'   \item{short_name_}{province name, e.g., Chongqing}
-#'   \item{full_name_}{province name including the administrative type, e.g., Chongqing Shi}
-#'   \item{_en}{province name in English}
-#'   \item{_zh}{province name in Chinese}
-#'   \item{_py}{province name in Pinyin (the official romanization system for Chinese in Mainland China)}
+#'   \item{short_name_en, short_name_zh, short_name_py}{province name in English, Chinese and Pinyin}
+#'   \item{full_name_en, full_name_zh, full_name_py}{province name including the administrative type, in English, Chinese and Pinyin}
 #'   \item{regex}{regular expressions matching province names in English, German and Chinese}
 #'   \item{type}{administrative type, e.g., municipality}
 #'   \item{mainland}{Does the province belong to Mainland China? `FALSE` for Hong Kong, Macao and Taiwan, `TRUE` otherwise}
@@ -53,7 +57,10 @@
 #'
 #' Note that the usage of codes varies by year. China Customs does not indicate which HS revision its statistics are based on but a small-n investigation suggests that the latest version is used for each record.
 #'
-#' @format A data frame with 77,320 rows and 4 variables:
+#' Data vintage: the dataset covers the years 2015 to 2026. The codes for
+#' 2015--2023 were retrieved in April 2024 and those for 2024--2026 in June 2026.
+#'
+#' @format A data frame with 104,236 rows and 4 variables:
 #' \describe{
 #'   \item{code}{commodity code}
 #'   \item{year}{year}
@@ -80,7 +87,11 @@
 #'
 #' A dataset containing all variable names that can appear in data downloaded from Chinese Customs. Variable names are given in English and Chinese to allow harmonizing them. Not all variables will occur in a given query.
 #'
-#' @format A data frame with 15 rows and 4 variables:
+#' Some clean names map from more than one English spelling because China
+#' Customs has changed the wording over time (e.g. "Supplimentary" vs
+#' "Supplementary"), so the table has more rows than there are clean names.
+#'
+#' @format A data frame with 17 rows and 4 variables:
 #' \describe{
 #'   \item{clean_name}{name used for harmonization of variable names}
 #'   \item{en}{English variable name}
@@ -99,20 +110,6 @@
 #'   \item{code}{trading partner code}
 #'   \item{en}{English trading partner name}
 #'   \item{zh}{Chinese trading partner name}
-#' }
-#' @source \url{http://stats.customs.gov.cn/indexEn}
-"cc_partners"
-
-#' China Customs commodity descriptions
-#'
-#' A dataset containing all 8-digit commodity codes and their descriptions in English and Chinese from China Customs, by year. HS codes up to the 6-digit level are standardized and can be queried through the `concordance` package. Note that it is unclear which HS revision China Customs was using in a given year.
-#'
-#' @format A data frame with 51,769 rows and 4 variables:
-#' \describe{
-#'   \item{code}{commodity code}
-#'   \item{year}{year}
-#'   \item{en}{English commodity name}
-#'   \item{zh}{Chinese commodity name}
 #' }
 #' @source \url{http://stats.customs.gov.cn/indexEn}
 "cc_partners"

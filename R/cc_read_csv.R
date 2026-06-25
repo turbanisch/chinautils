@@ -1,18 +1,56 @@
 #' Read and Clean Trade Data From China Customs
 #'
-#' This is a function to read CSV files downloaded from China Customs with the correct encoding and column type specification, no matter which columns are present in the data, their order and the language. The function harmonizes column names between English and Chinese files and converts dates.
+#' Reads one or more CSV files downloaded from China Customs
+#' (\url{http://stats.customs.gov.cn/indexEn}) with the correct encoding and
+#' column types, regardless of which columns are present, their order, or the
+#' language (English, Chinese, or a mix across files). Column names are
+#' harmonized to stable English snake_case names and the `yearmonth` column, if
+#' present, is converted to a date.
 #'
-#' Note that this function does not perform any sanity checks on the data, so make sure no individual CSV file was cut off after 10,000 lines. The function expects (and ignores) a trailing comma in each line of the CSV file which is normally added by China Customs. The order of columns has to be the same across files.
+#' @details
+#' China Customs exports vary in shape depending on the query: single-month
+#' downloads omit the date column, and the set and order of columns depend on
+#' which dimensions were selected and the chosen sort order. This function reads
+#' each file according to its own header, so files of different shapes and
+#' languages can be read in one call and row-bound together.
 #'
-#' @param file Path to one or multiple CSV files downloaded from China Customs. Files can be in English, Chinese, or a mix of both.
-#' @param drop_descriptions Keep only codes for commodity, partner country, province, and customs regime? Default is `TRUE` because descriptions are redundant and often include spelling mistakes.
+#' The function emits warnings (rather than failing silently) for three common
+#' problems:
+#' \itemize{
+#'   \item \strong{Truncation.} The download page silently truncates results at
+#'     10,000 rows. A file with exactly 10,000 data rows may be incomplete.
+#'   \item \strong{Wrong encoding.} If none of the column names match known
+#'     China Customs variables, the file was probably saved in a different
+#'     encoding than `encoding`.
+#'   \item \strong{Unrecognized columns.} Columns not found in
+#'     [cc_variable_names] are kept under their original name and read as text.
+#' }
 #'
-#' @return A tibble
+#' Each line is expected to carry a trailing comma (as added by China Customs);
+#' the resulting empty column is ignored.
+#'
+#' @param paths Path to one or more CSV files downloaded from China Customs.
+#'   Files can be in English, Chinese, or a mix of both.
+#' @param drop_descriptions Keep only codes for commodity, partner country,
+#'   province, and customs regime? Default is `TRUE` because the bundled
+#'   descriptions are redundant and often contain spelling mistakes. Clean
+#'   descriptions can be re-attached from [cc_commodities], [cc_partners] and
+#'   [cc_regimes].
+#' @param encoding Character encoding of the files. Defaults to `"GB18030"`, the
+#'   encoding China Customs uses (a superset of GBK and GB2312). Override only if
+#'   you re-saved a file in another encoding such as `"UTF-8"`.
+#'
+#' @return A tibble.
 #' @export
 #' @import dplyr
 #' @import tidyr
 #' @import readr
-cc_read_csv <- function(paths, drop_descriptions = TRUE) {
+#'
+#' @examples
+#' # read a single bundled example file
+#' path <- system.file("extdata", "english-full.csv", package = "chinautils")
+#' if (nzchar(path)) cc_read_csv(path)
+cc_read_csv <- function(paths, drop_descriptions = TRUE, encoding = "GB18030") {
 
   # define helper function for single file first, vectorize later
   read_single_csv <- function(path) {
@@ -22,28 +60,61 @@ cc_read_csv <- function(paths, drop_descriptions = TRUE) {
     # glimpse at first row to determine which columns are present and which language is used
     first_row <- read_csv(path,
                           n_max = 0L,
-                          locale = locale(encoding = "GB18030"),
+                          locale = locale(encoding = encoding),
                           col_types = cols(.default = col_character())) |>
       # trailing comma leads to empty column, ignore
       suppressMessages()
 
-    valid_colnames <- colnames(first_row |> select(!starts_with("...")))
+    raw_colnames <- colnames(first_row)
+
+    # undecodable names almost always mean the file is not in `encoding`; bail
+    # out early with a clear message rather than crashing later on mojibake
+    if (any(!validUTF8(raw_colnames))) {
+      cli::cli_abort(c(
+        "Could not decode the column names in {.file {path}} as {.val {encoding}}.",
+        "i" = "The file is probably saved in a different encoding. Set {.arg encoding} accordingly."
+      ))
+    }
+
+    # trailing comma leads to an empty column starting with "...", ignore
+    valid_colnames <- raw_colnames[!startsWith(raw_colnames, "...")]
+
+    # decoding health check: if nothing matches the dictionary, the encoding is
+    # likely wrong (e.g. a UTF-8 file decoded as GB18030 yields valid gibberish)
+    known_names <- union(chinautils::cc_variable_names$en, chinautils::cc_variable_names$zh)
+    if (!any(valid_colnames %in% known_names)) {
+      cli::cli_warn(c(
+        "None of the column names in {.file {path}} match known China Customs variables.",
+        "i" = "The file may not be encoded as {.val {encoding}}; check the {.arg encoding} argument."
+      ))
+    }
+
     language <- if (any(stringr::str_detect(valid_colnames, "\\p{script=Han}"))) "zh" else "en"
 
     # find replacements for column names and their colspec (preserving order)
-    lookup <- tibble(valid_colnames) |>
+    lookup <- tibble::tibble(valid_colnames) |>
       left_join(chinautils::cc_variable_names,
                 by = c("valid_colnames" = language),
                 # multiple matches from Chinese due to spelling variations in English
                 multiple = "any")
 
-    clean_colnames <- lookup$clean_name
-    col_spec <- str_flatten(lookup$col_type)
+    # warn about columns we do not recognize (kept as-is, read as text)
+    unmatched <- lookup$valid_colnames[is.na(lookup$clean_name)]
+    if (length(unmatched) > 0) {
+      cli::cli_warn(c(
+        "Unrecognized {cli::qty(unmatched)} column{?s} in {.file {path}}.",
+        "i" = "Kept under the original name and read as text: {.val {unmatched}}."
+      ))
+    }
+
+    # fall back to original name / character type for unmatched columns
+    clean_colnames <- coalesce(lookup$clean_name, lookup$valid_colnames)
+    col_spec <- stringr::str_flatten(coalesce(lookup$col_type, "c"))
 
     out <- read_csv(
       file = path,
       na = "?",
-      locale = locale(encoding = "GB18030"),
+      locale = locale(encoding = encoding),
       col_select = all_of(valid_colnames),
       col_types = col_spec
     ) |>
@@ -51,18 +122,29 @@ cc_read_csv <- function(paths, drop_descriptions = TRUE) {
       suppressMessages()
 
     colnames(out) <- clean_colnames
+
+    # the download page silently truncates at 10,000 rows
+    if (nrow(out) == 10000L) {
+      cli::cli_warn(c(
+        "{.file {path}} has exactly 10,000 rows.",
+        "i" = "China Customs truncates downloads at 10,000 rows; this file may be incomplete."
+      ))
+    }
+
     out
   }
 
   # vectorize
-  dat <- map(paths, read_single_csv) |>
-    list_rbind()
+  dat <- purrr::map(paths, read_single_csv) |>
+    purrr::list_rbind()
 
   # drop redundant descriptions
   if (drop_descriptions) dat <- dat |> select(!ends_with("_name"))
 
-  # convert yearmonth to date
-  dat <- dat|> mutate(yearmonth = lubridate::ym(yearmonth))
+  # convert yearmonth to date (absent in single-month downloads)
+  if ("yearmonth" %in% colnames(dat)) {
+    dat <- dat |> mutate(yearmonth = lubridate::ym(.data$yearmonth))
+  }
 
   # sort
   dat |> arrange(across(any_of(c(

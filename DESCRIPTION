@@ -1,26 +1,40 @@
 Package: chinautils
 Title: Helper Functions To Deal With Chinese (Administrative) Data
-Version: 0.0.0.9000
-Authors@R: 
-    person("Felix", "Turbanisch", , "felix.turbanisch@uni-goettingen.com", role = c("aut", "cre"),
+Version: 0.1.0
+Authors@R:
+    person("Felix", "Turbanisch", , "felix.turbanisch@uni-goettingen.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-2279-1686"))
-Description: This package provides a collection of helper functions to make working with Chinese (administrative) data easier.
+Description: A collection of helper functions to make working with Chinese
+    (administrative) data easier. It reads and harmonizes trade data exported
+    from China Customs (handling encoding, mixed English/Chinese columns and
+    arbitrary column order) and harmonizes Chinese country and province names
+    across simplified and traditional character variants.
 License: MIT + file LICENSE
+URL: https://github.com/turbanisch/chinautils, https://turbanisch.github.io/chinautils/
+BugReports: https://github.com/turbanisch/chinautils/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
-Depends: 
-    R (>= 2.10)
+Depends:
+    R (>= 4.1.0)
 LazyData: true
-Imports: 
+Imports:
     cli,
     countrycode,
     dplyr,
-    tidyr,
     fuzzyjoin,
     lubridate,
+    purrr,
     readr,
-    ropencc
-Suggests: 
-    testthat (>= 3.0.0)
+    stringi,
+    stringr,
+    tibble,
+    tidyr
+Suggests:
+    knitr,
+    rmarkdown,
+    stringdist,
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

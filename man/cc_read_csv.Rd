@@ -4,19 +4,57 @@
 \alias{cc_read_csv}
 \title{Read and Clean Trade Data From China Customs}
 \usage{
-cc_read_csv(paths, drop_descriptions = TRUE)
+cc_read_csv(paths, drop_descriptions = TRUE, encoding = "GB18030")
 }
 \arguments{
-\item{drop_descriptions}{Keep only codes for commodity, partner country, province, and customs regime? Default is \code{TRUE} because descriptions are redundant and often include spelling mistakes.}
+\item{paths}{Path to one or more CSV files downloaded from China Customs.
+Files can be in English, Chinese, or a mix of both.}
 
-\item{file}{Path to one or multiple CSV files downloaded from China Customs. Files can be in English, Chinese, or a mix of both.}
+\item{drop_descriptions}{Keep only codes for commodity, partner country,
+province, and customs regime? Default is \code{TRUE} because the bundled
+descriptions are redundant and often contain spelling mistakes. Clean
+descriptions can be re-attached from \link{cc_commodities}, \link{cc_partners} and
+\link{cc_regimes}.}
+
+\item{encoding}{Character encoding of the files. Defaults to \code{"GB18030"}, the
+encoding China Customs uses (a superset of GBK and GB2312). Override only if
+you re-saved a file in another encoding such as \code{"UTF-8"}.}
 }
 \value{
-A tibble
+A tibble.
 }
 \description{
-This is a function to read CSV files downloaded from China Customs with the correct encoding and column type specification, no matter which columns are present in the data, their order and the language. The function harmonizes column names between English and Chinese files and converts dates.
+Reads one or more CSV files downloaded from China Customs
+(\url{http://stats.customs.gov.cn/indexEn}) with the correct encoding and
+column types, regardless of which columns are present, their order, or the
+language (English, Chinese, or a mix across files). Column names are
+harmonized to stable English snake_case names and the \code{yearmonth} column, if
+present, is converted to a date.
 }
 \details{
-Note that this function does not perform any sanity checks on the data, so make sure no individual CSV file was cut off after 10,000 lines. The function expects (and ignores) a trailing comma in each line of the CSV file which is normally added by China Customs. The order of columns has to be the same across files.
+China Customs exports vary in shape depending on the query: single-month
+downloads omit the date column, and the set and order of columns depend on
+which dimensions were selected and the chosen sort order. This function reads
+each file according to its own header, so files of different shapes and
+languages can be read in one call and row-bound together.
+
+The function emits warnings (rather than failing silently) for three common
+problems:
+\itemize{
+\item \strong{Truncation.} The download page silently truncates results at
+10,000 rows. A file with exactly 10,000 data rows may be incomplete.
+\item \strong{Wrong encoding.} If none of the column names match known
+China Customs variables, the file was probably saved in a different
+encoding than \code{encoding}.
+\item \strong{Unrecognized columns.} Columns not found in
+\link{cc_variable_names} are kept under their original name and read as text.
+}
+
+Each line is expected to carry a trailing comma (as added by China Customs);
+the resulting empty column is ignored.
+}
+\examples{
+# read a single bundled example file
+path <- system.file("extdata", "english-full.csv", package = "chinautils")
+if (nzchar(path)) cc_read_csv(path)
 }

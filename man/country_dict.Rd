@@ -10,8 +10,8 @@ A data frame with 208 rows and 15 variables:
 \item{short_name_en}{Short country name in English}
 \item{iso3c}{ISO3 character country code}
 \item{regex}{regular expressions to match short and full country names (as well as variants thereof) after conversion to simplified characters}
-\item{short_name_zh_}{Short country name in Chinese. See details for region codes.}
-\item{full_name_zh_}{Full (official) country name in Chinese. See details for region codes.}
+\item{short_name_zh_cn, short_name_zh_hk, short_name_zh_mo, short_name_zh_my, short_name_zh_sg, short_name_zh_tw}{Short country name in Chinese, by region}
+\item{full_name_zh_cn, full_name_zh_hk, full_name_zh_mo, full_name_zh_my, full_name_zh_sg, full_name_zh_tw}{Full (official) country name in Chinese, by region}
 }
 }
 \source{
@@ -34,5 +34,9 @@ A dataset containing country names in Chinese and regular expressions to match t
    sg \tab 新加坡简体 \tab Singapore (simplified) \cr
    tw \tab 臺灣正體 \tab Taiwan (traditional) \cr
 }
+
+
+The Chinese name columns carry a region suffix (\verb{_cn}, \verb{_hk}, \verb{_mo}, \verb{_my},
+\verb{_sg}, \verb{_tw}) as described in the table above.
 }
 \keyword{datasets}

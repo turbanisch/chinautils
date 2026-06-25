@@ -18,12 +18,17 @@ knitr::opts_chunk$set(
 library(chinautils)
 ```
 
-# chinautils
+# chinautils <img src="man/figures/logo.png" align="right" height="139" alt="chinautils website" />
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/turbanisch/chinautils/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/turbanisch/chinautils/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-This package contains helper functions to make working with Chinese (administrative) data easier.
+This package contains helper functions to make working with Chinese (administrative) data easier. It does two things:
+
+- **Read trade data from China Customs** into a tidy table, taking care of the encoding, the mix of English and Chinese column names, and the varying set and order of columns (`cc_read_csv()`).
+- **Harmonize Chinese country and province names** across the different scripts, transliterations and spellings used in Mainland China, Hong Kong, Macau, Taiwan, Malaysia and Singapore (`countryname()` and `provincename()`).
 
 ## Installation
 
@@ -32,6 +37,51 @@ You can install the development version of chinautils from [GitHub](https://gith
 ``` r
 # install.packages("devtools")
 devtools::install_github("turbanisch/chinautils")
+```
+
+## Read China Customs trade data
+
+Trade data exported from [China Customs](http://stats.customs.gov.cn/indexEn) comes as CSV files that are awkward to read: they use the GB18030 encoding, ship in English or Chinese (and you may end up mixing both if you download several queries), and the set and order of columns depends on the query. `cc_read_csv()` reads one or more of these files into a single tidy tibble with stable English column names -- regardless of language, column order, or which columns happen to be present.
+
+```{r}
+path <- system.file("extdata", "english-full.csv", package = "chinautils")
+cc_read_csv(path)
+```
+
+You can pass several files at once -- even mixing English and Chinese exports with different columns -- and they are row-bound into one table:
+
+```{r}
+files <- system.file(
+  "extdata",
+  c("english-full.csv", "chinese-full.csv"),
+  package = "chinautils"
+)
+cc_read_csv(files)
+```
+
+`cc_read_csv()` also warns about the silent pitfalls of the download page, such as files that were truncated at 10,000 rows or saved in an unexpected encoding.
+
+### Re-attaching clean labels
+
+By default, `cc_read_csv()` keeps only the numeric codes for commodities, partners, customs regimes and provinces and drops the descriptions that ship in the file, because they are redundant and often misspelled. Clean descriptions can be re-attached from the bundled lookup tables `cc_partners`, `cc_regimes` and `cc_commodities`:
+
+```{r message=FALSE}
+library(dplyr)
+
+trade <- cc_read_csv(path)
+
+trade |>
+  left_join(cc_partners, by = c("partner" = "code")) |>
+  select(partner, partner_en = en, value_usd)
+```
+
+Commodity descriptions change from year to year, so join `cc_commodities` on both the commodity code and the year:
+
+```{r}
+trade |>
+  mutate(year = lubridate::year(yearmonth)) |>
+  left_join(cc_commodities, by = c("commodity" = "code", "year")) |>
+  distinct(commodity, year, en)
 ```
 
 ## Harmonize country names (in Chinese)

@@ -4,7 +4,7 @@
 #'
 #' @source Methodology and code for the conversion table can be found in [this repo](https://github.com/turbanisch/chinese-countryname-regex).
 #'
-#' @note In the case of regex matching, the input is converted to simplified characters using [OpenCC](https://github.com/BYVoid/OpenCC) first.
+#' @note In the case of regex matching, the input is first converted from traditional to simplified characters using ICU text transforms (via the `stringi` package), so that traditional-character input matches the simplified-character dictionary.
 #'
 #' @note The message informing about the number of successful conversions refers to unique values of the input vector. Character variants (think: simplified vs. traditional) are counted as two distinct values. A resulting missing value is due to one of two reasons: either there was no match or there were multiple matches and thus the result was ambiguous. Additional info messages inform the user about each cause.
 #'
@@ -52,7 +52,7 @@ countryname <- function(
 
   if (origin == "regex") {
     # simplify Chinese + fuzzy matching
-    merge_key <- ropencc::converter(ropencc::T2S)[sourcevar]
+    merge_key <- stringi::stri_trans_general(sourcevar, "Traditional-Simplified")
     join_fun <- fuzzyjoin::regex_left_join
   } else {
     # use exact matching

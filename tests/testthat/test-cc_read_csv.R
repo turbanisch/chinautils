@@ -53,10 +53,28 @@ test_that("single-month / month-less downloads are handled without error", {
 })
 
 test_that("multiple files of different shape/language bind together", {
-  out <- cc_read_csv(fixture(c("english-full.csv", "chinese-full.csv")))
+  # files differ (Chinese lacks yearmonth, uses value_cny) -> warns
+  expect_warning(
+    out <- cc_read_csv(fixture(c("english-full.csv", "chinese-full.csv"))),
+    "same columns"
+  )
   # union of columns; currency columns stay separate (never summed)
   expect_true(all(c("value_usd", "value_cny") %in% colnames(out)))
   expect_identical(nrow(out), 10L) # 5 + 5 trimmed fixtures
+})
+
+test_that("binding files with inconsistent columns warns, naming yearmonth", {
+  # appending a single-month update (no date column) to a dated series
+  expect_warning(
+    cc_read_csv(fixture(c("english-full.csv", "english-degenerate.csv"))),
+    "yearmonth"
+  )
+})
+
+test_that("binding files with identical columns does not warn", {
+  expect_no_warning(
+    cc_read_csv(fixture(c("english-full.csv", "english-full-permutated.csv")))
+  )
 })
 
 test_that("drop_descriptions toggles the *_name columns", {

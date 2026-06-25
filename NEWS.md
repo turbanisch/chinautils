@@ -6,8 +6,13 @@ First documented release.
 
 * `cc_read_csv()` gained an `encoding` argument and now warns about the
   common pitfalls of China Customs downloads: files truncated at 10,000
-  rows, unexpected encodings, and unrecognized columns. Files without a
-  date column (single-month or aggregated downloads) are read without error.
+  rows, unexpected encodings, unrecognized columns, and -- when several
+  files are read together -- columns that are not present in every file
+  (such as the date column missing from a single-month update). Files
+  without a date column (single-month or aggregated downloads) are read
+  without error. The documentation also notes that trade flow is never
+  stored in the files, so imports and exports cannot be told apart
+  automatically.
 
 ## Improvements
 

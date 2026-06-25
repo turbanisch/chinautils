@@ -29,6 +29,17 @@
 #' Each line is expected to carry a trailing comma (as added by China Customs);
 #' the resulting empty column is ignored.
 #'
+#' When several files are read at once, a warning is issued if they do not all
+#' share the same columns, because the row-bind then fills the gaps with `NA`.
+#'
+#' One difference cannot be detected automatically: the **trade flow**. Imports,
+#' exports and combined "import and export" downloads all have exactly the same
+#' columns -- the direction is never recorded in the file. Reading an
+#' imports-only file together with an exports-only file therefore merges the two
+#' silently. If you need to keep them apart, add a column identifying the flow to
+#' each file before binding, for example
+#' `cc_read_csv("imports.csv") |> dplyr::mutate(flow = "import")`.
+#'
 #' @param paths Path to one or more CSV files downloaded from China Customs.
 #'   Files can be in English, Chinese, or a mix of both.
 #' @param drop_descriptions Keep only codes for commodity, partner country,
@@ -135,8 +146,31 @@ cc_read_csv <- function(paths, drop_descriptions = TRUE, encoding = "GB18030") {
   }
 
   # vectorize
-  dat <- purrr::map(paths, read_single_csv) |>
-    purrr::list_rbind()
+  parts <- purrr::map(paths, read_single_csv)
+
+  # warn if the files do not share the same columns: row-binding fills the gaps
+  # with NA, which is easy to miss (e.g. appending a single-month update, which
+  # has no date column, to an existing multi-month series)
+  if (length(parts) > 1) {
+    colsets <- lapply(parts, colnames)
+    inconsistent <- setdiff(Reduce(union, colsets), Reduce(intersect, colsets))
+    if (length(inconsistent) > 0) {
+      msg <- c(
+        "The files do not all contain the same columns.",
+        "i" = "Missing from at least one file and filled with {.val NA}: {.val {inconsistent}}."
+      )
+      if ("yearmonth" %in% inconsistent) {
+        msg <- c(msg, "i" = paste(
+          "A missing {.field yearmonth} is expected when a single-month download",
+          "(which has no date column) is combined with other files. Set it",
+          "manually if you know the month."
+        ))
+      }
+      cli::cli_warn(msg)
+    }
+  }
+
+  dat <- parts |> purrr::list_rbind()
 
   # drop redundant descriptions
   if (drop_descriptions) dat <- dat |> select(!ends_with("_name"))

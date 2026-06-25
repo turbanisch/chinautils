@@ -103,10 +103,26 @@ trade |>
 
 ## Things to watch out for
 
-`cc_read_csv()` warns about two silent pitfalls of the download page:
+`cc_read_csv()` warns about several silent pitfalls of the download page:
 
 - **Truncation.** The portal caps a download at 10,000 rows. If a file has
   exactly 10,000 data rows it may be incomplete, and you get a warning.
 - **Encoding.** If the column names cannot be decoded as GB18030 (for example
   because a file was re-saved as UTF-8), `cc_read_csv()` stops with a clear
   message; pass `encoding = "UTF-8"` to override the default.
+- **Mismatched columns.** When you read several files at once and they do not
+  all share the same columns, you get a warning, because the affected rows are
+  filled with `NA`. This is the case described above when you append a
+  single-month update to a dated series.
+
+One pitfall cannot be detected automatically: the **trade flow**. Imports,
+exports and combined "import and export" downloads all have exactly the same
+columns -- the direction is never stored in the file. If you read an
+imports-only file together with an exports-only file, the two are merged without
+warning. Tag each file yourself before binding if you need to keep them apart:
+
+```{r eval = FALSE}
+imports <- cc_read_csv("imports.csv") |> mutate(flow = "import")
+exports <- cc_read_csv("exports.csv") |> mutate(flow = "export")
+bind_rows(imports, exports)
+```

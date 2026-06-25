@@ -15,7 +15,7 @@ BugReports: https://github.com/turbanisch/chinautils/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
-    R (>= 2.10)
+    R (>= 3.5)
 LazyData: true
 Imports:
     cli,

@@ -1,0 +1,261 @@
+# chinautils
+
+This package contains helper functions to make working with Chinese
+(administrative) data easier. It does two things:
+
+- **Read trade data from China Customs** into a tidy table, taking care
+  of the encoding, the mix of English and Chinese column names, and the
+  varying set and order of columns
+  ([`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)).
+- **Harmonize Chinese country and province names** across the different
+  scripts, transliterations and spellings used in Mainland China, Hong
+  Kong, Macau, Taiwan, Malaysia and Singapore
+  ([`countryname()`](https://turbanisch.github.io/chinautils/reference/countryname.md)
+  and
+  [`provincename()`](https://turbanisch.github.io/chinautils/reference/provincename.md)).
+
+## Installation
+
+You can install the development version of chinautils from
+[GitHub](https://github.com/) with:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("turbanisch/chinautils")
+```
+
+## Read China Customs trade data
+
+Trade data exported from [China
+Customs](http://stats.customs.gov.cn/indexEn) comes as CSV files that
+are awkward to read: they use the GB18030 encoding, ship in English or
+Chinese (and you may end up mixing both if you download several
+queries), and the set and order of columns depends on the query.
+[`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)
+reads one or more of these files into a single tidy tibble with stable
+English column names – regardless of language, column order, or which
+columns happen to be present.
+
+``` r
+
+path <- system.file("extdata", "english-full.csv", package = "chinautils")
+cc_read_csv(path)
+#> # A tibble: 5 × 10
+#>   yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2
+#>   <date>     <chr>     <chr>   <chr>  <chr>         <dbl> <chr>         <dbl>
+#> 1 2026-01-01 29012920  110     10     44            81782 Kilogram          0
+#> 2 2026-01-01 29012920  121     10     44             5800 Kilogram          0
+#> 3 2026-01-01 29012920  133     10     31             3574 Kilogram          0
+#> 4 2026-01-01 29012920  143     15     61             1248 Kilogram          0
+#> 5 2026-01-01 29012920  412     10     37             1725 Kilogram          0
+#> # ℹ 2 more variables: unit_2 <chr>, value_usd <dbl>
+```
+
+You can pass several files at once – even mixing English and Chinese
+exports with different columns – and they are row-bound into one table:
+
+``` r
+
+files <- system.file(
+  "extdata",
+  c("english-full.csv", "chinese-full.csv"),
+  package = "chinautils"
+)
+cc_read_csv(files)
+#> # A tibble: 10 × 11
+#>    yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2
+#>    <date>     <chr>     <chr>   <chr>  <chr>         <dbl> <chr>         <dbl>
+#>  1 2026-01-01 29012920  110     10     44            81782 Kilogram          0
+#>  2 2026-01-01 29012920  121     10     44             5800 Kilogram          0
+#>  3 2026-01-01 29012920  133     10     31             3574 Kilogram          0
+#>  4 2026-01-01 29012920  143     15     61             1248 Kilogram          0
+#>  5 2026-01-01 29012920  412     10     37             1725 Kilogram          0
+#>  6 NA         29012920  110     10     44           214847 千克              0
+#>  7 NA         29012920  121     10     44            12577 千克              0
+#>  8 NA         29012920  133     10     21              100 千克              0
+#>  9 NA         29012920  133     10     31             6750 千克              0
+#> 10 NA         29012920  133     10     37               48 千克              0
+#> # ℹ 3 more variables: unit_2 <chr>, value_usd <dbl>, value_cny <dbl>
+```
+
+[`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)
+also warns about the silent pitfalls of the download page, such as files
+that were truncated at 10,000 rows or saved in an unexpected encoding.
+
+### Re-attaching clean labels
+
+By default,
+[`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)
+keeps only the numeric codes for commodities, partners, customs regimes
+and provinces and drops the descriptions that ship in the file, because
+they are redundant and often misspelled. Clean descriptions can be
+re-attached from the bundled lookup tables `cc_partners`, `cc_regimes`
+and `cc_commodities`:
+
+``` r
+
+library(dplyr)
+
+trade <- cc_read_csv(path)
+
+trade |>
+  left_join(cc_partners, by = c("partner" = "code")) |>
+  select(partner, partner_en = en, value_usd)
+#> # A tibble: 5 × 3
+#>   partner partner_en  value_usd
+#>   <chr>   <chr>           <dbl>
+#> 1 110     Hong Kong      315286
+#> 2 121     Macau           28579
+#> 3 133     South Korea    199307
+#> 4 143     Taiwan         234351
+#> 5 412     Chile            4137
+```
+
+Commodity descriptions change from year to year, so join
+`cc_commodities` on both the commodity code and the year:
+
+``` r
+
+trade |>
+  mutate(year = lubridate::year(yearmonth)) |>
+  left_join(cc_commodities, by = c("commodity" = "code", "year")) |>
+  distinct(commodity, year, en)
+#> # A tibble: 1 × 3
+#>   commodity  year en       
+#>   <chr>     <dbl> <chr>    
+#> 1 29012920   2026 Acetylene
+```
+
+## Harmonize country names (in Chinese)
+
+Coming up with regular expressions to match country names in Chinese is
+slightly more involved than for other languages. The reason is that
+different parts of the world use different variants of Chinese, beyond
+the basic distinction between simplified and traditional characters.
+Mainland China, Malaysia and Singapore all use simplified characters
+whereas Hong Kong, Macau and Taiwan continue to use traditional
+characters – but local usage may vary within each group.
+
+This is especially true for proper names like country names. Not only
+can they vary character by character depending on the script that is
+used, but they might also reflect different (phonetic) transliterations
+or refer to another name altogether. Here are some examples for each
+case:
+
+1.  **Different scripts.** Germany is referred to as *Deguo* 德国 in
+    Mainland China and 德國 in Taiwan – where 国 is the simplified
+    character corresponding to 國, easy. However, there are some less
+    obvious cases, as we will see below.
+2.  **Different transliterations**. Many country names have been
+    phonetically adapted from other languages and translators in every
+    Chinese-speaking region have taken their artistic liberties when
+    doing so. For example, Hong Kongers refer to Barbados as *Babaduosi*
+    巴巴多斯 whereas people from Taiwan call it *Babeiduo* 巴貝多.
+3.  **Alternative names**. Instead of adapting a country name according
+    to its sound, Chinese-speaking people in some regions have also
+    opted to convert the original meaning of the country name into
+    Chinese. For example, Montenegro is *Heishan* 黑山 (“black
+    mountain”) in Mainland China. People on Taiwan, on the other hand,
+    kept their phonetic transliteration *Mengteneigeluo* 蒙特內哥羅.
+
+The function `countryname` identifies country names in Chinese and
+converts them to various standardized output formats, such as ISO3
+codes. It uses regular expressions to match country name variants in
+both simplified and traditional Chinese:
+
+``` r
+
+# match variants in both simplified and traditional Chinese
+countryname(c("中国", "中华人民共和国", "亞東開化中國早"))
+#> ✔ Matched 3 out of 3 values.
+#> [1] "CHN" "CHN" "CHN"
+
+# regex ignore languages other than Chinese and ambiguous cases
+countryname(c("ドイツ国", "刚果"))
+#> ✖ Failed to match 2 out of 2 values.
+#> ℹ No match could be found for ドイツ国 and 刚果.
+#> [1] NA NA
+
+# get warned about potential pitfalls, such as multiple matches
+countryname(c("塞尔维亚和黑山", "捷克斯洛伐克", "德国德国"))
+#> ✖ Failed to match 2 out of 3 values.
+#> ℹ Multiple matches were found for 塞尔维亚和黑山 and 捷克斯洛伐克.
+#> [1] NA    NA    "DEU"
+
+# non-regex matching requires an exact match
+countryname(c("德国", "德国人"), origin = "short_name_zh_cn", destination = "short_name_en")
+#> ✖ Failed to match 1 out of 2 values.
+#> ℹ No match could be found for 德国人.
+#> [1] "Germany" NA
+```
+
+Methodology and code for the conversion table can be found in [this
+repo](https://github.com/turbanisch/chinese-countryname-regex).
+
+## Harmonize province codes
+
+The names of Chinese provinces may vary between data sources: Inner
+Mongolia might come as “Inner Mongol”, “Inner Mongolia Autonomous
+Region”, “内蒙古”, “内蒙古自治区”, “Nei Menggu” or “Nei Menggu Zizhiqu”,
+making it hard to merge province-level data.
+
+`provincename` uses regular expressions to convert province names in
+English, German or Chinese to ISO codes and other output formats, such
+as those used by China Customs.
+
+``` r
+
+provincename("Innere Mongolei")
+#> [1] "CN-NM"
+provincename("Hong Kong", destination = "full_name_zh")
+#> [1] "香港特别行政区"
+provincename("黑龙江", destination = "china_customs")
+#> [1] "23"
+```
+
+The function does not, however, take care of spelling errors that are
+pervasive in Chinese administrative data. Usually, the name in Chinese
+characters is the least error-prone. When regular expressions fail to
+capture province names, fuzzy matching using string distance based on
+the custom dictionary
+[`chinautils::province_dict`](https://turbanisch.github.io/chinautils/reference/province_dict.md)
+will likely get the job done:
+
+``` r
+
+library(tidyverse)
+
+# create (misspelled) province names to be matched
+df <- tibble(
+  misspelled = c("Schanghai",
+                 "Peking",
+                 "Innere Mongolei", 
+                 "Hong Kong", 
+                 "Hong Kong Special Administrative Zone",
+                 "Xingjiang")
+)
+
+# filter cartesian join by shortest distance
+df |> 
+  left_join(select(province_dict, short_name_en),
+            by = character(0)) |> 
+  mutate(dist = stringdist::stringdist(misspelled, short_name_en)) |> 
+  group_by(misspelled) |> 
+  filter(min_rank(dist) == 1L) |> 
+  ungroup()
+#> Warning: Using `by = character()` to perform a cross join was deprecated in dplyr 1.1.0.
+#> ℹ Please use `cross_join()` instead.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
+#> # A tibble: 6 × 3
+#>   misspelled                            short_name_en   dist
+#>   <chr>                                 <chr>          <dbl>
+#> 1 Schanghai                             Shanghai           1
+#> 2 Peking                                Beijing            3
+#> 3 Innere Mongolei                       Inner Mongolia     3
+#> 4 Hong Kong                             Hong Kong          0
+#> 5 Hong Kong Special Administrative Zone Hong Kong         28
+#> 6 Xingjiang                             Xinjiang           1
+```

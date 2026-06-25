@@ -9,11 +9,8 @@ A data frame with 34 rows and 12 variables:
 \describe{
 \item{iso_3166_2}{province code according to ISO 3166-2:CN}
 \item{gb_2260}{province code according to Guobiao GB/T 2260}
-\item{short_name_}{province name, e.g., Chongqing}
-\item{full_name_}{province name including the administrative type, e.g., Chongqing Shi}
-\item{_en}{province name in English}
-\item{_zh}{province name in Chinese}
-\item{_py}{province name in Pinyin (the official romanization system for Chinese in Mainland China)}
+\item{short_name_en, short_name_zh, short_name_py}{province name in English, Chinese and Pinyin}
+\item{full_name_en, full_name_zh, full_name_py}{province name including the administrative type, in English, Chinese and Pinyin}
 \item{regex}{regular expressions matching province names in English, German and Chinese}
 \item{type}{administrative type, e.g., municipality}
 \item{mainland}{Does the province belong to Mainland China? \code{FALSE} for Hong Kong, Macao and Taiwan, \code{TRUE} otherwise}
@@ -28,5 +25,10 @@ province_dict
 }
 \description{
 A dataset containing the names and codes of China's provinces as well as regular expressions to match province names in English, German and Chinese.
+}
+\details{
+The \verb{short_name_*} columns give the bare province name (e.g. Chongqing) and
+the \verb{full_name_*} columns include the administrative type (e.g. Chongqing
+Shi); the \verb{_en}, \verb{_zh} and \verb{_py} suffixes denote English, Chinese and Pinyin.
 }
 \keyword{datasets}

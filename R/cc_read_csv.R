@@ -143,7 +143,7 @@ cc_read_csv <- function(paths, drop_descriptions = TRUE, encoding = "GB18030") {
 
   # convert yearmonth to date (absent in single-month downloads)
   if ("yearmonth" %in% colnames(dat)) {
-    dat <- dat |> mutate(yearmonth = lubridate::ym(yearmonth))
+    dat <- dat |> mutate(yearmonth = lubridate::ym(.data$yearmonth))
   }
 
   # sort

@@ -159,6 +159,12 @@ province_dict <- province_dict |>
     mainland
   )
 
+# ensure all character columns are marked UTF-8: scraped data can arrive with
+# an "unknown" encoding mark, which trips R CMD check ("non-ASCII strings") and
+# breaks exact string matching against the dictionary
+province_dict <- province_dict |>
+  mutate(across(where(is.character), enc2utf8))
+
 # Identify regular expression origin codes (for countrycode)
 attr(province_dict, "origin_regex") <- "regex"
 

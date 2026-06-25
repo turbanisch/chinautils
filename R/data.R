@@ -11,13 +11,16 @@
 #'| sg | 新加坡简体            | Singapore (simplified)  |
 #'| tw | 臺灣正體              | Taiwan (traditional)    |
 #'
+#' The Chinese name columns carry a region suffix (`_cn`, `_hk`, `_mo`, `_my`,
+#' `_sg`, `_tw`) as described in the table above.
+#'
 #' @format A data frame with 208 rows and 15 variables:
 #' \describe{
 #'   \item{short_name_en}{Short country name in English}
 #'   \item{iso3c}{ISO3 character country code}
 #'   \item{regex}{regular expressions to match short and full country names (as well as variants thereof) after conversion to simplified characters}
-#'   \item{short_name_zh_}{Short country name in Chinese. See details for region codes.}
-#'   \item{full_name_zh_}{Full (official) country name in Chinese. See details for region codes.}
+#'   \item{short_name_zh_cn, short_name_zh_hk, short_name_zh_mo, short_name_zh_my, short_name_zh_sg, short_name_zh_tw}{Short country name in Chinese, by region}
+#'   \item{full_name_zh_cn, full_name_zh_hk, full_name_zh_mo, full_name_zh_my, full_name_zh_sg, full_name_zh_tw}{Full (official) country name in Chinese, by region}
 #'   }
 #' @source
 #' \url{https://github.com/turbanisch/chinese-countryname-regex}
@@ -28,15 +31,16 @@
 #'
 #' A dataset containing the names and codes of China's provinces as well as regular expressions to match province names in English, German and Chinese.
 #'
+#' The `short_name_*` columns give the bare province name (e.g. Chongqing) and
+#' the `full_name_*` columns include the administrative type (e.g. Chongqing
+#' Shi); the `_en`, `_zh` and `_py` suffixes denote English, Chinese and Pinyin.
+#'
 #' @format A data frame with 34 rows and 12 variables:
 #' \describe{
 #'   \item{iso_3166_2}{province code according to ISO 3166-2:CN}
 #'   \item{gb_2260}{province code according to Guobiao GB/T 2260}
-#'   \item{short_name_}{province name, e.g., Chongqing}
-#'   \item{full_name_}{province name including the administrative type, e.g., Chongqing Shi}
-#'   \item{_en}{province name in English}
-#'   \item{_zh}{province name in Chinese}
-#'   \item{_py}{province name in Pinyin (the official romanization system for Chinese in Mainland China)}
+#'   \item{short_name_en, short_name_zh, short_name_py}{province name in English, Chinese and Pinyin}
+#'   \item{full_name_en, full_name_zh, full_name_py}{province name including the administrative type, in English, Chinese and Pinyin}
 #'   \item{regex}{regular expressions matching province names in English, German and Chinese}
 #'   \item{type}{administrative type, e.g., municipality}
 #'   \item{mainland}{Does the province belong to Mainland China? `FALSE` for Hong Kong, Macao and Taiwan, `TRUE` otherwise}

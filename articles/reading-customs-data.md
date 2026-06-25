@@ -61,6 +61,12 @@ files <- system.file(
   package = "chinautils"
 )
 cc_read_csv(files)
+#> Warning: The files do not all contain the same columns.
+#> ℹ Missing from at least one file and filled with "NA": "yearmonth",
+#>   "value_usd", and "value_cny".
+#> ℹ A missing yearmonth is expected when a single-month download (which has no
+#>   date column) is combined with other files. Set it manually if you know the
+#>   month.
 #> # A tibble: 10 × 11
 #>    yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2
 #>    <date>     <chr>     <chr>   <chr>  <chr>         <dbl> <chr>         <dbl>
@@ -145,7 +151,7 @@ trade |>
 ## Things to watch out for
 
 [`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)
-warns about two silent pitfalls of the download page:
+warns about several silent pitfalls of the download page:
 
 - **Truncation.** The portal caps a download at 10,000 rows. If a file
   has exactly 10,000 data rows it may be incomplete, and you get a
@@ -155,3 +161,21 @@ warns about two silent pitfalls of the download page:
   [`cc_read_csv()`](https://turbanisch.github.io/chinautils/reference/cc_read_csv.md)
   stops with a clear message; pass `encoding = "UTF-8"` to override the
   default.
+- **Mismatched columns.** When you read several files at once and they
+  do not all share the same columns, you get a warning, because the
+  affected rows are filled with `NA`. This is the case described above
+  when you append a single-month update to a dated series.
+
+One pitfall cannot be detected automatically: the **trade flow**.
+Imports, exports and combined “import and export” downloads all have
+exactly the same columns – the direction is never stored in the file. If
+you read an imports-only file together with an exports-only file, the
+two are merged without warning. Tag each file yourself before binding if
+you need to keep them apart:
+
+``` r
+
+imports <- cc_read_csv("imports.csv") |> mutate(flow = "import")
+exports <- cc_read_csv("exports.csv") |> mutate(flow = "export")
+bind_rows(imports, exports)
+```

@@ -121,6 +121,12 @@ multi-month aggregate, hence no month column):</p>
 <span>  package <span class="op">=</span> <span class="st">"chinautils"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cc_read_csv.html">cc_read_csv</a></span><span class="op">(</span><span class="va">files</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The files do not all contain the same columns.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Missing from at least one file and filled with <span style="color: #0000BB;">"NA"</span>: <span style="color: #0000BB;">"yearmonth"</span>,</span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">"value_usd"</span>, and <span style="color: #0000BB;">"value_cny"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> A missing <span style="color: #00BB00;">yearmonth</span> is expected when a single-month download (which has no</span></span>
+<span><span class="co">#&gt;   date column) is combined with other files. Set it manually if you know the</span></span>
+<span><span class="co">#&gt;   month.</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 11</span></span></span>
 <span><span class="co">#&gt;    yearmonth  commodity partner regime province quantity_1 unit_1   quantity_2</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -192,7 +198,7 @@ when you need them:</p>
 <div class="section level2">
 <h2 id="things-to-watch-out-for">Things to watch out for<a class="anchor" aria-label="anchor" href="#things-to-watch-out-for"></a>
 </h2>
-<p><code><a href="../reference/cc_read_csv.html">cc_read_csv()</a></code> warns about two silent pitfalls of the
+<p><code><a href="../reference/cc_read_csv.html">cc_read_csv()</a></code> warns about several silent pitfalls of the
 download page:</p>
 <ul>
 <li>
@@ -204,7 +210,23 @@ you get a warning.</li>
 GB18030 (for example because a file was re-saved as UTF-8),
 <code><a href="../reference/cc_read_csv.html">cc_read_csv()</a></code> stops with a clear message; pass
 <code>encoding = "UTF-8"</code> to override the default.</li>
+<li>
+<strong>Mismatched columns.</strong> When you read several files at
+once and they do not all share the same columns, you get a warning,
+because the affected rows are filled with <code>NA</code>. This is the
+case described above when you append a single-month update to a dated
+series.</li>
 </ul>
+<p>One pitfall cannot be detected automatically: the <strong>trade
+flow</strong>. Imports, exports and combined “import and export”
+downloads all have exactly the same columns – the direction is never
+stored in the file. If you read an imports-only file together with an
+exports-only file, the two are merged without warning. Tag each file
+yourself before binding if you need to keep them apart:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">imports</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cc_read_csv.html">cc_read_csv</a></span><span class="op">(</span><span class="st">"imports.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>flow <span class="op">=</span> <span class="st">"import"</span><span class="op">)</span></span>
+<span><span class="va">exports</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cc_read_csv.html">cc_read_csv</a></span><span class="op">(</span><span class="st">"exports.csv"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>flow <span class="op">=</span> <span class="st">"export"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">imports</span>, <span class="va">exports</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

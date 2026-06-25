@@ -41,7 +41,7 @@
 <div class="section level3">
 <h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
 <ul><li>
-<code><a href="../reference/cc_read_csv.html">cc_read_csv()</a></code> gained an <code>encoding</code> argument and now warns about the common pitfalls of China Customs downloads: files truncated at 10,000 rows, unexpected encodings, and unrecognized columns. Files without a date column (single-month or aggregated downloads) are read without error.</li>
+<code><a href="../reference/cc_read_csv.html">cc_read_csv()</a></code> gained an <code>encoding</code> argument and now warns about the common pitfalls of China Customs downloads: files truncated at 10,000 rows, unexpected encodings, unrecognized columns, and – when several files are read together – columns that are not present in every file (such as the date column missing from a single-month update). Files without a date column (single-month or aggregated downloads) are read without error. The documentation also notes that trade flow is never stored in the files, so imports and exports cannot be told apart automatically.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-0-1-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-1-0"></a></h3>

@@ -67,6 +67,18 @@ common problems:
 Each line is expected to carry a trailing comma (as added by China
 Customs); the resulting empty column is ignored.
 
+When several files are read at once, a warning is issued if they do not
+all share the same columns, because the row-bind then fills the gaps
+with `NA`.
+
+One difference cannot be detected automatically: the **trade flow**.
+Imports, exports and combined "import and export" downloads all have
+exactly the same columns – the direction is never recorded in the file.
+Reading an imports-only file together with an exports-only file
+therefore merges the two silently. If you need to keep them apart, add a
+column identifying the flow to each file before binding, for example
+`cc_read_csv("imports.csv") |> dplyr::mutate(flow = "import")`.
+
 ## Examples
 
 ``` r
